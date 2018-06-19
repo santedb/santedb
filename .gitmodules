@@ -7,3 +7,6 @@
 [submodule "santedb-api"]
 	path = santedb-api
 	url = https://github.com/santedb/santedb-api.git
+[submodule "santedb-orm"]
+	path = santedb-orm
+	url = https://github.com/santedb/santedb-orm.git
