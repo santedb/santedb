@@ -5,13 +5,13 @@ IF %1=="" (
 ) ELSE (
 	ECHO WILL UPDATE SUBMODULES WITH "%1"
 	SET cwd = %cd%
-	FOR /D %%G IN (.) DO (
+	FOR /D %%G IN (.\*) DO (
 		PUSHD %%G
 		IF EXIST ".git" (
 			ECHO Pushing %%G
-			break
 			git add *
 			git commit -am %1
+			git pull
 			git push origin HEAD:master
 		)
 		POPD
