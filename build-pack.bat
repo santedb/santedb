@@ -14,23 +14,26 @@ set cwd = %cd%
 echo Will use NUGET in %cd%
 echo Will use MSBUILD in %msbuild%
 
-FOR /R %cwd% %%G IN (*packages.config) DO (
-	echo Restoring %%G 
-	pushd %%~pG
-	%cd%\nuget.exe restore -SolutionDirectory ..\
+FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss) DO (
+	echo Building %%P
+	pushd %%P
+
+	FOR /R %%G IN (*.sln) DO (
+		echo Building %%~pG 
+		pushd %%~pG
+		%msbuild% %%G /t:restore /p:configuration=release /m
+		%msbuild% %%G /t:rebuild /p:configuration=release /m
+		popd
+	)
+
+	FOR /R %%G IN (*.nuspec) DO (
+		echo Packing %%~pG
+		pushd %%~pG
+		%cd%\nuget.exe restore -SolutionDirectory ..\
+		%cd%\nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
+		popd
+	)	
 	popd
 )
 
-FOR /R %cwd% %%G IN (*.sln) DO (
-	echo Building %%~pG 
-	pushd %%~pG
-	%msbuild% %%G /t:rebuild /p:configuration=release /m
-	popd
-)
 
-FOR /R %cwd% %%G IN (*.nuspec) DO (
-	echo Packing %%~pG
-	pushd %%~pG
-	%cd%\nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
-	popd
-)
