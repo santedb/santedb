@@ -12,10 +12,9 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild
 
 if defined msbuild (
 	set cwd = %cd%
-	echo Will use NUGET in %cd%
 	echo Will use MSBUILD in %msbuild%
 
-	FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss) DO (
+	FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-client) DO (
 		echo Building %%P
 		pushd %%P
 
@@ -30,8 +29,8 @@ if defined msbuild (
 		FOR /R %%G IN (*.nuspec) DO (
 			echo Packing %%~pG
 			pushd %%~pG
-			%cd%\nuget.exe restore -SolutionDirectory ..\
-			%cd%\nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
+			nuget.exe restore -SolutionDirectory ..\
+			nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
 			popd
 		)	
 		popd
