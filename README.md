@@ -36,11 +36,11 @@ $ git submodule init
 $ git submodule update
 ```
 
+Ensure that nuget.exe is located in your path and that ```%localappdata%\nugetstaging```, is registered as a local repository, 
+then build the nuget packages for SanteDB with:
+
+```
+$ build-nuget
+```
+
 Additional documentation for setup of individual SanteDB components can be found in each project repository.
-
-## Sub-Modules:
-
-* [santedb-model](santedb-model) - The core model of SanteDB's RIM implementation
-* [santedb-orm](santedb-orm) - A high performance ORM using SanteDB's RIM implementation 
-* [santedb-api](santedb-api) - A series of API classes used by the disconnected client and server software
-* [santedb-applets](santedb-applets) - API for interacting with SanteDB's HTML5 + JavaScript packages

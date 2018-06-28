@@ -14,7 +14,7 @@ if defined msbuild (
 	set cwd = %cd%
 	echo Will use MSBUILD in %msbuild%
 
-	FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-client,reportr) DO (
+	FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-dc-core) DO (
 		echo Building %%P
 		pushd %%P
 
