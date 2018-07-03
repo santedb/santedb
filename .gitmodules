@@ -25,3 +25,6 @@
 [submodule "santedb-dc-core"]
 	path = santedb-dc-core
 	url = https://github.com/santedb/santedb-dc-core
+[submodule "santedb-sdk"]
+	path = santedb-sdk
+	url = https://github.com/santedb/santedb-sdk
