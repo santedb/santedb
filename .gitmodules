@@ -1,30 +1,39 @@
 [submodule "santedb-applets"]
 	path = santedb-applets
 	url = https://github.com/santedb/santedb-applets.git
+	branch = master
 [submodule "santedb-model"]
 	path = santedb-model
 	url = https://github.com/santedb/santedb-model.git
+	branch = master
 [submodule "santedb-api"]
 	path = santedb-api
 	url = https://github.com/santedb/santedb-api.git
+	branch = master
 [submodule "santedb-orm"]
 	path = santedb-orm
 	url = https://github.com/santedb/santedb-orm.git
+	branch = master
 [submodule "santedb-bre-js"]
 	path = santedb-bre-js
 	url = https://github.com/santedb/santedb-bre-js.git
+	branch = master
 [submodule "santedb-cdss"]
 	path = santedb-cdss
 	url = https://github.com/santedb/santedb-cdss.git
 [submodule "santedb-client"]
 	path = santedb-client
 	url = https://github.com/santedb/santedb-client.git
+	branch = master
 [submodule "reportr"]
 	path = reportr
 	url = https://github.com/santedb/reportr
+	branch = master
 [submodule "santedb-dc-core"]
 	path = santedb-dc-core
 	url = https://github.com/santedb/santedb-dc-core
+	branch = master
 [submodule "santedb-sdk"]
 	path = santedb-sdk
 	url = https://github.com/santedb/santedb-sdk
+	branch = master
