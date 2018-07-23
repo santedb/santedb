@@ -33,7 +33,3 @@
 	path = santedb-dc-core
 	url = https://github.com/santedb/santedb-dc-core
 	branch = master
-[submodule "santedb-sdk"]
-	path = santedb-sdk
-	url = https://github.com/santedb/santedb-sdk
-	branch = master
