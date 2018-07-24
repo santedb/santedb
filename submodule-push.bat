@@ -9,10 +9,11 @@ IF %1=="" (
 		PUSHD %%G
 		IF EXIST ".git" (
 			ECHO Pushing %%G
+			git checkout master
 			git add *
 			git commit -am %1
 			git pull
-			git push origin HEAD:master
+			git push
 		)
 		POPD
 	)
