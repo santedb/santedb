@@ -53,11 +53,21 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Cdss.Xml.Test", "sa
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{9D9F8267-349B-49FA-A0D5-CAA8CE6A0D7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Messaging.AMI.Client", "santedb-api\SanteDB.Messaging.AMI.Client\SanteDB.Messaging.AMI.Client.csproj", "{0FDBD4DB-30AE-4E1D-AAE1-5FE1370DCE3F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Messaging.AMI.Client", "santedb-client\SanteDB.Messaging.AMI.Client\SanteDB.Messaging.AMI.Client.csproj", "{0FDBD4DB-30AE-4E1D-AAE1-5FE1370DCE3F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Messaging.HDSI.Client", "santedb-api\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj", "{C222B929-6E9E-4B2E-A98E-CC23EE681047}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Messaging.HDSI.Client", "santedb-client\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj", "{C222B929-6E9E-4B2E-A98E-CC23EE681047}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Messaging.RISI.Client", "santedb-api\SanteDB.Messaging.RISI.Client\SanteDB.Messaging.RISI.Client.csproj", "{4F5D3E16-3FAB-4244-B3F0-98983E6C6F69}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Messaging.RISI.Client", "santedb-client\SanteDB.Messaging.RISI.Client\SanteDB.Messaging.RISI.Client.csproj", "{4F5D3E16-3FAB-4244-B3F0-98983E6C6F69}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{738AB900-B34F-41E4-B742-E2767831D1B7}"
+	ProjectSection(SolutionItems) = preProject
+		build-nuget.bat = build-nuget.bat
+		cloneall.bat = cloneall.bat
+		README.md = README.md
+		submodule-init.bat = submodule-init.bat
+		submodule-pull.bat = submodule-pull.bat
+		submodule-push.bat = submodule-push.bat
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

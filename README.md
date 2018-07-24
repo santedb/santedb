@@ -30,17 +30,32 @@ SanteDB is based on the underlying CDR used by the [Open Immunize Platform](http
 To clone this project follow these steps:
 
 ```
-$ git clone https://github.com/santedb/santedb.git
-$ cd santedb
-$ git submodule init
-$ git submodule update
+> git clone https://github.com/santedb/santedb.git
+> cd santedb
+> git submodule init
+> git submodule update --remote
 ```
 
 Ensure that nuget.exe is located in your path and that ```%localappdata%\nugetstaging```, is registered as a local repository, 
 then build the nuget packages for SanteDB with:
 
 ```
-$ build-nuget
+> build-nuget
 ```
 
+Please note that you will need to have the followig additional projects cloned and compiled in your local nugetstaging (until we upload the packages to nuget):
+* [SwaggerWCF MEDIC Fork](https://github.com/MohawkMEDIC/swaggerwcf) - Which provides support for JSON.NET structures
+* [SQLite.NET-PCL MEDIC Fork](https://github.com/MohawkMEDIC/SQLite.NET-PCL) - Which provides support for SQLCipher
+
 Additional documentation for setup of individual SanteDB components can be found in each project repository.
+
+## Get All SanteDB Projects
+
+This project represents the collection of SanteDB APIs that are used by other projects. These APIs and other projects are located in other repositories in the SanteDB community.
+If you would like to clone **all** of the SanteDB code to your local environment, use the command:
+
+```
+> cloneall.bat
+```
+
+This will clone all projects on the SanteDB project in the parent directory for SanteDB and will initialize any submodule references. 
