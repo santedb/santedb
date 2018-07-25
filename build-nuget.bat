@@ -29,7 +29,9 @@ if defined msbuild (
 		FOR /R %%G IN (*.nuspec) DO (
 			echo Packing %%~pG
 			pushd %%~pG
-			nuget.exe restore -SolutionDirectory ..\
+			if exist "packages.config" (
+				nuget.exe restore -SolutionDirectory ..\
+			)
 			nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
 			popd
 		)	
