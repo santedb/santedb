@@ -11,7 +11,8 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild
 )
 
 if defined msbuild (
-	set cwd = %cd%
+	set nuget="%cd%\.nuget\nuget.exe"
+	echo Will use NUGET %nuget%
 	echo Will use MSBUILD in %msbuild%
 
 	FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-dc-core) DO (
@@ -30,9 +31,9 @@ if defined msbuild (
 			echo Packing %%~pG
 			pushd %%~pG
 			if exist "packages.config" (
-				nuget.exe restore -SolutionDirectory ..\
+				%nuget% restore -SolutionDirectory ..\
 			)
-			.\.nuget\nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
+			%nuget% pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
 			popd
 		)	
 		popd
