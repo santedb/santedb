@@ -32,7 +32,7 @@ if defined msbuild (
 			if exist "packages.config" (
 				nuget.exe restore -SolutionDirectory ..\
 			)
-			nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
+			.\.nuget\nuget.exe pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release
 			popd
 		)	
 		popd
