@@ -16,6 +16,9 @@ git clone https://github.com/santedb/santedb-orm
 git clone https://github.com/santedb/santedb-sdk
 git clone https://github.com/santedb/santedb-server
 git clone https://github.com/santedb/santedb-match
+git clone https://github.com/santedb/santedb-dcg
+git clone https://github.com/santedb/santedb-restsvc
+git clone https://github.com/santedb/restsrvr
 
 echo Initializing submodules
 for /D %%D in (.\*) do (
