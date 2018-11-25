@@ -33,3 +33,9 @@
 	path = santedb-dc-core
 	url = https://github.com/santedb/santedb-dc-core
 	branch = master
+[submodule "restsrvr"]
+	path = restsrvr
+	url = https://github.com/santedb/restsrvr
+[submodule "santedb-restsvc"]
+	path = santedb-restsvc
+	url = https://github.com/santedb/santedb-restsvc

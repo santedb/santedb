@@ -15,7 +15,7 @@ if defined msbuild (
 	echo Will use NUGET %nuget%
 	echo Will use MSBUILD in %msbuild%
 
-	FOR %%P IN (santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-dc-core) DO (
+	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-restsvc,santedb-dc-core) DO (
 		echo Building %%P
 		pushd %%P
 
