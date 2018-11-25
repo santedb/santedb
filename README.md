@@ -3,7 +3,7 @@
 Welcome to SanteDB community! SanteDB provides a general purpose Clinical Data Repository (CDR) and client software for storage of applications in a variety of 
 use cases. SanteDB is a holistic package and includes:
 
-* [A general purpose Intelligent CDR based on the powerful HL7 Reference Information Model (RIM) and FHIR](/santedb/santedb-server).
+* [A general purpose Intelligent CDR based on the powerful HL7 Reference Information Model (RIM) and FHIR](https://github.com/santedb/santedb-server).
     * All resources are fully versioned
     * Customizable Act<>Act, Act<>Entity, Entity<>Entity relationship tracking
     * Completely customizable concept dictionary & reference term set
@@ -16,7 +16,7 @@ use cases. SanteDB is a holistic package and includes:
     * Policy based access controls 
     * Powerful consent management system (PDP, PEP, PIP implementation) supporting policy based data masking 
     * Support for user elevation (break-the-glass)
-* [A fully functional disconnected client environment which](/santedb/santedb-dc-core):
+* [A fully functional disconnected client environment which](https://github.com/santedb/santedb-dc-core):
     * Can partially replicate the master CDR data on demand based on subscriptions
     * Operate offline for months at a time
     * Execute all business rules on the CDR with no connection to the server software
