@@ -97,6 +97,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.DisconnectedClient.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.DisconnectedClient.Ags", "santedb-dc-core\SanteDB.DisconnectedClient.Ags\SanteDB.DisconnectedClient.Ags.csproj", "{EDCD4511-B016-48EE-BD73-491A6B6687E6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.ReportR", "reportr\SanteDB.ReportR\SanteDB.ReportR.csproj", "{39A382D5-A4A1-415A-8CEB-618177E23FAC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -458,6 +460,20 @@ Global
 		{EDCD4511-B016-48EE-BD73-491A6B6687E6}.SanteDBRelease|Any CPU.Build.0 = Release|Any CPU
 		{EDCD4511-B016-48EE-BD73-491A6B6687E6}.SignedRelease|Any CPU.ActiveCfg = Release|Any CPU
 		{EDCD4511-B016-48EE-BD73-491A6B6687E6}.SignedRelease|Any CPU.Build.0 = Release|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.MacDebug|Any CPU.ActiveCfg = MacDebug|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.MacDebug|Any CPU.Build.0 = MacDebug|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.MacRelease|Any CPU.ActiveCfg = MacRelease|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.MacRelease|Any CPU.Build.0 = MacRelease|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.SanteDBDebug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.SanteDBDebug|Any CPU.Build.0 = Debug|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.SanteDBRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.SanteDBRelease|Any CPU.Build.0 = Release|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.SignedRelease|Any CPU.ActiveCfg = Release|Any CPU
+		{39A382D5-A4A1-415A-8CEB-618177E23FAC}.SignedRelease|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
