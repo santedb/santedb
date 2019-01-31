@@ -7,10 +7,14 @@ for D in {"restsrvr","santedb-model","santedb-api","santedb-applets","santedb-br
 		cd "${D}"
 		
 		for S in *.sln; do
-			if [ -f "${S%.sln}-linux.sln" ]; then
-				msbuild "${S%.sln}-linux.sln" /t:restore /t:rebuild /p:Configuration=Debug /m
-			else 
-				msbuild "${S}" /t:restore /t:rebuild /p:Configuration=Debug /m 
+			if [[ "${S}" == *"-linux"* ]]; then
+				echo "Skipping ${S}"
+			else
+				if [ -f "${S%.sln}-linux.sln" ]; then
+					msbuild "${S%.sln}-linux.sln" /t:restore /t:rebuild /p:Configuration=Debug /m
+				else 
+					msbuild "${S}" /t:restore /t:rebuild /p:Configuration=Debug /m 
+				fi
 			fi
 		done 
 
