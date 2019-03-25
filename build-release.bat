@@ -11,7 +11,13 @@ if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild
 	) else ( echo Unable to locate VS 2017 build tools, will use default build tools )
 )
 
+if [%1] == [] (
+	echo Must specify version number
+	goto end
+)
+
 if defined msbuild (
+	echo "Will release %1"
 	if exist "%cd%\.nuget\nuget.exe" (
 		set nuget="%cd%\.nuget\nuget.exe"
 	)
@@ -23,6 +29,11 @@ if defined msbuild (
 	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-restsvc,santedb-client,reportr,santedb-dc-core) DO (
 		echo Building %%P
 		pushd %%P
+
+		IF EXIST ".git" (
+			git checkout master
+			git pull
+		)
 
 		FOR /R %%G IN (*.sln) DO (
 			echo Building %%~pG 
@@ -37,19 +48,31 @@ if defined msbuild (
 			if exist "packages.config" (
 				%nuget% restore -SolutionDirectory ..\
 			)
-			if [%1] == [] (
+			if [%2] == [] (
 				%nuget% pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release 
 			) else (
 				echo Publishing NUPKG
 				%nuget% pack -prop Configuration=Release 
 				FOR /R %%F IN (*.nupkg) do (
-					%nuget% push %%F -Source https://api.nuget.org/v3/index.json -ApiKey %1
+					%nuget% push %%F -Source https://api.nuget.org/v3/index.json -ApiKey %2
 				)
 			) 
 			popd
+		)
+
+		IF EXIST ".git" (
+			ECHO Pushing %%G
+			git add *
+			git commit -am "Release of version %1"
+			git push
+			git tag -a v%1 -m "Release of version %1"
+			git push origin v%1
 		)	
 		popd
 	)
 	)
 )	
 )
+
+
+:end
