@@ -64,9 +64,7 @@ if defined msbuild (
 			ECHO Pushing %%G
 			git add *
 			git commit -am "Release of version %1"
-			git push
 			git tag -a v%1 -m "Release of version %1"
-			git push origin v%1
 		)	
 		popd
 	)

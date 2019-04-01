@@ -14,6 +14,7 @@ IF %1=="" (
 			git commit -am %1
 			git pull
 			git push
+			git push --tags
 		)
 		POPD
 	)
