@@ -1,7 +1,7 @@
 #!/bin/bash
 
 echo Building Modules
-for D in {"restsrvr","santedb-model","santedb-api","santedb-applets","santedb-bre-js","santedb-orm","santedb-cdss","santedb-restsvc","santedb-client","reportr","santedb-dc-core"}; do 
+for D in {"restsrvr","santedb-model","santedb-api","santedb-applets","santedb-bre-js","santedb-bis","santedb-orm","santedb-cdss","santedb-restsvc","santedb-client","reportr","santedb-match","santedb-dc-core"}; do 
 	echo "${D}"
 	if [ -d "${D}" ]; then
 		cd "${D}"
