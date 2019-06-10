@@ -11,11 +11,10 @@ for D in {"restsrvr","santedb-model","santedb-api","santedb-applets","santedb-br
 				echo "Skipping ${S}"
 			else
 				if [ -f "${S%.sln}-linux.sln" ]; then
-					msbuild "${S%.sln}-linux.sln" /t:restore 
-					msbuild "${S%.sln}-linux.sln" /t:rebuild /p:Configuration=Debug
+					msbuild
+					msbuild "${S%.sln}-linux.sln" /t:restore /t:build /p:Configuration=Debug /m
 				else 
-					msbuild "${S}" /t:restore 
-					msbuild "${S}" /t:build /p:Configuration=Debug 
+					msbuild "${S}" /t:restore /t:build /p:Configuration=Debug /m 
 				fi
 			fi
 		done 
