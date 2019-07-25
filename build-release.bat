@@ -1,14 +1,20 @@
 @echo off
 echo Will build and push NUGET
 
+
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe" (
-        echo will use VS 2017 build tools
+        echo will use VS 2017 Enterprise build tools
         set msbuild="C:\Program Files (x86)\Microsoft Visual Studio\2017\Enterprise\MSBuild\15.0\Bin\MSBuild.exe"
 ) else (
-	if exist "c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe" (
-        echo will use VS 2017 build tools
-        set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
-	) else ( echo Unable to locate VS 2017 build tools, will use default build tools )
+	if exist "C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe" (
+        	echo will use VS 2017 Professional build tools
+	        set msbuild="C:\Program Files (x86)\Microsoft Visual Studio\2017\Professional\MSBuild\15.0\Bin\MSBuild.exe"
+	) else (
+		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe" (
+	        echo will use VS 2017 Community build tools
+        	set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\MSBuild.exe"
+		) else ( echo Unable to locate VS 2017 build tools, will use default build tools )
+	)
 )
 
 if [%1] == [] (
@@ -26,7 +32,7 @@ if defined msbuild (
 	echo Will use MSBUILD in %msbuild%
 
 	if exist "%nuget%" (
-	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-orm,santedb-cdss,santedb-restsvc,santedb-client,reportr,santedb-match, santedb-bis, santedb-dc-core) DO (
+	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js, santedb-bis,santedb-orm,santedb-cdss,santedb-restsvc,santedb-client,reportr,santedb-match, santedb-dc-core) DO (
 		echo Building %%P
 		pushd %%P
 
