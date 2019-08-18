@@ -26,22 +26,23 @@ if defined msbuild (
 	if exist "%nuget%" (
 	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-restsvc,santedb-bis,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-match,santedb-dc-core) DO (
 		echo Building %%P
-		pushd %%P
+		pushd "%%P"
 
 		FOR /R %%G IN (*.sln) DO (
-			echo Building %%~pG 
-			pushd %%~pG
-			%msbuild% %%G /t:restore /t:rebuild /p:configuration=Debug  /m
+			echo Entering %%~pG
+			pushd "%%~pG"
+			echo Now in %cd%
+			%msbuild% "%%G" /t:restore /t:rebuild /p:configuration=Debug  /m
 			popd
 		)
 
 		FOR /R %%G IN (*.nuspec) DO (
 			echo Packing %%~pG
-			pushd %%~pG
+			pushd "%%~pG"
 			if exist "packages.config" (
 				%nuget% restore -SolutionDirectory ..\
 			)
-			%nuget% pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Debug -Symbols
+			%nuget% pack -OutputDirectory "%localappdata%\NugetStaging" -prop Configuration=Debug -Symbols
 			popd
 		)	
 		popd
