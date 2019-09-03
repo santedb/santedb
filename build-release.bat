@@ -34,7 +34,7 @@ if defined msbuild (
 	if exist "%nuget%" (
 	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js, santedb-bis,santedb-orm,santedb-cdss,santedb-restsvc,santedb-client,reportr,santedb-match, santedb-dc-core) DO (
 		echo Building %%P
-		pushd %%P
+		pushd "%%P"
 
 		IF EXIST ".git" (
 			git checkout master
@@ -43,24 +43,24 @@ if defined msbuild (
 
 		FOR /R %%G IN (*.sln) DO (
 			echo Building %%~pG 
-			pushd %%~pG
-			%msbuild% %%G /t:restore /t:rebuild /p:configuration=Release /m
+			pushd "%%~pG"
+			%msbuild% "%%G" /t:restore /t:rebuild /p:configuration=Release /m
 			popd
 		)
 
 		FOR /R %%G IN (*.nuspec) DO (
 			echo Packing %%~pG
-			pushd %%~pG
+			pushd "%%~pG"
 			if exist "packages.config" (
 				%nuget% restore -SolutionDirectory ..\
 			)
 			if [%2] == [] (
-				%nuget% pack -OutputDirectory %localappdata%\NugetStaging -prop Configuration=Release 
+				%nuget% pack -OutputDirectory "%localappdata%\NugetStaging" -prop Configuration=Release 
 			) else (
 				echo Publishing NUPKG
 				%nuget% pack -prop Configuration=Release 
 				FOR /R %%F IN (*.nupkg) do (
-					%nuget% push %%F -Source https://api.nuget.org/v3/index.json -ApiKey %2
+					%nuget% push "%%F" -Source https://api.nuget.org/v3/index.json -ApiKey %2
 				)
 			) 
 			popd
