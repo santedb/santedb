@@ -39,8 +39,11 @@ if defined msbuild (
 
 	if exist "%nuget%" (
 	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js, santedb-bis,santedb-orm,santedb-cdss,santedb-restsvc,santedb-client,reportr,santedb-match, santedb-dc-core) DO (
-		echo Building %%P
 		pushd "%%P"
+		echo Preparing assets : LICENSE, NOTICE, etc.
+		copy ..\LICENSE /y
+		copy ..\License.rtf /y
+		echo Building %%P
 
 		IF EXIST ".git" (
 			git checkout master
