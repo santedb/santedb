@@ -25,10 +25,6 @@
 	path = santedb-client
 	url = https://github.com/santedb/santedb-client.git
 	branch = master
-[submodule "reportr"]
-	path = reportr
-	url = https://github.com/santedb/reportr
-	branch = master
 [submodule "santedb-dc-core"]
 	path = santedb-dc-core
 	url = https://github.com/santedb/santedb-dc-core

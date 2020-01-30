@@ -11,18 +11,17 @@ for %%f in (.nuspec,.csproj,AssemblyInfo.cs)  DO (
 		    echo Skipping %%j
 	    ) else (
 		
-		if exist %%j (
-		    echo Processing %%j
-		    for /f "delims=" %%i in ('type "%%~j" ^& break ^> "%%~j"') do (
-        		set "line=%%i"
-		        setlocal EnableDelayedExpansion
-        		set "line=!line:%search%=%replace%!"
-	        	>>"%%~j" echo(!line!
-	        	endlocal
-		    )
+			if exist %%j (
+				echo Processing %%j
+				for /f "delims=" %%i in ('type "%%~j" ^& break ^> "%%~j"') do (
+					set "line=%%i"
+				    setlocal EnableDelayedExpansion
+					set "line=!line:%search%=%replace%!"
+					>>"%%~j" echo(!line!
+					endlocal
+				)
+			)
 		)
-	      )
 	)
 )
-
 endlocal
