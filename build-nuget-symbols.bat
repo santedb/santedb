@@ -31,11 +31,13 @@ if defined msbuild (
 	echo Will use MSBUILD in %msbuild%
 
 	if exist "%nuget%" (
-	FOR %%P IN (restsrvr, santedb-model,santedb-api,santedb-applets,santedb-bre-js,santedb-restsvc,santedb-bis,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-match,santedb-dc-core) DO (
+	FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,santedb-bre-js,santedb-bis,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-match,santedb-dc-core) DO (
+	if exist "%%P" (
+		
 		echo Building %%P
 		pushd "%%P"
 
-		FOR /R %%G IN (*.sln) DO (
+		FOR %%G IN (*.sln) DO (
 			echo Entering %%~pG
 			pushd "%%~pG"
 			echo Now in %cd%
@@ -53,7 +55,9 @@ if defined msbuild (
 			popd
 		)	
 		popd
+
 	)
 	)
+)
 )	
 )
