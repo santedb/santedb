@@ -73,7 +73,7 @@ if exist "%%P" (
 				echo Publishing NUPKG
 				%nuget% pack -prop Configuration=Release 
 				FOR /R %%F IN (*.nupkg) do (
-					%nuget% push "%%F" -Source https://api.nuget.org/v3/index.json -ApiKey %2 
+					 %nuget% push "%%F" -Source https://api.nuget.org/v3/index.json -ApiKey %2 
 				)
 			) 
 			popd
