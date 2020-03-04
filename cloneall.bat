@@ -3,22 +3,11 @@
 cd ..
 echo Cloning Projects to parent directory %cd%
 git clone https://github.com/santedb/applets
-git clone https://github.com/santedb/reportr
-git clone https://github.com/santedb/santedb
-git clone https://github.com/santedb/santedb-api
-git clone https://github.com/santedb/santedb-applets
-git clone https://github.com/santedb/santedb-bre-js
-git clone https://github.com/santedb/santedb-cdss
-git clone https://github.com/santedb/santedb-client
-git clone https://github.com/santedb/santedb-dc-core
-git clone https://github.com/santedb/santedb-model
-git clone https://github.com/santedb/santedb-orm
 git clone https://github.com/santedb/santedb-sdk
 git clone https://github.com/santedb/santedb-server
-git clone https://github.com/santedb/santedb-match
+git clone https://github.com/santedb/santedb-www
 git clone https://github.com/santedb/santedb-dcg
-git clone https://github.com/santedb/santedb-restsvc
-git clone https://github.com/santedb/restsrvr
+git clone https://github.com/santedb/santempi
 
 echo Initializing submodules
 for /D %%D in (.\*) do (
