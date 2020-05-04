@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27428.2002
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29509.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SanteDB.Core.Api", "santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj", "{3A45F695-47A2-464C-ACE6-BDABBFA39FBC}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -62,6 +62,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{738AB900-B34F-41E4-B742-E2767831D1B7}"
 	ProjectSection(SolutionItems) = preProject
 		build-nuget.bat = build-nuget.bat
+		BUILD.md = BUILD.md
 		cloneall.bat = cloneall.bat
 		CONTRIBUTING.md = CONTRIBUTING.md
 		NOTICE.md = NOTICE.md
