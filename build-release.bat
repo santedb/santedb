@@ -10,7 +10,6 @@ FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,s
 		ECHO Building %%P
 
 		IF EXIST ".git" (
-			git checkout master
 			git pull
 		)
 
@@ -35,6 +34,8 @@ FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,s
 			ECHO Pushing %%G
 			git add *
 			git commit -am "Release of version %1"
+			git checkout master
+			git merge develop
 			git tag -a v%1 -m "Release of version %1"
 			git push
 			git push --tags
