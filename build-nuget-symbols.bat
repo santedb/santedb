@@ -1,4 +1,5 @@
 @ECHO OFF
+DEL *.nuspec /S /Q
 FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,santedb-bre-js,santedb-bis,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-match,santedb-dc-core) DO (
 	IF EXIST "%%P" (
 		

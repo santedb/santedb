@@ -39,6 +39,7 @@ FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,s
 			git tag -a v%1 -m "Release of version %1"
 			git push
 			git push --tags
+			git checkout develop
 		)	
 		POPD
 	)
