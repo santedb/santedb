@@ -109,8 +109,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SanteDB.DisconnectedClient.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SanteDB.DisconnectedClient.UI", "santedb-dc-core\SanteDB.DisconnectedClient.UI\SanteDB.DisconnectedClient.UI.csproj", "{35ECF662-93CA-413E-9165-98D252E95B41}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SanteDB.Matcher.Orm", "santedb-match\SanteDB.Matcher.Orm\SanteDB.Matcher.Orm.csproj", "{697FB057-534D-4F6D-979B-926CA3B00914}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -528,20 +526,6 @@ Global
 		{35ECF662-93CA-413E-9165-98D252E95B41}.SanteDBRelease|Any CPU.Build.0 = Release|Any CPU
 		{35ECF662-93CA-413E-9165-98D252E95B41}.SignedRelease|Any CPU.ActiveCfg = Release|Any CPU
 		{35ECF662-93CA-413E-9165-98D252E95B41}.SignedRelease|Any CPU.Build.0 = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.MacDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.MacDebug|Any CPU.Build.0 = Debug|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.MacRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.MacRelease|Any CPU.Build.0 = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.Release|Any CPU.Build.0 = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.SanteDBDebug|Any CPU.ActiveCfg = Debug|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.SanteDBDebug|Any CPU.Build.0 = Debug|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.SanteDBRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.SanteDBRelease|Any CPU.Build.0 = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.SignedRelease|Any CPU.ActiveCfg = Release|Any CPU
-		{697FB057-534D-4F6D-979B-926CA3B00914}.SignedRelease|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -578,7 +562,6 @@ Global
 		{406D064D-78B4-467F-86C6-B3E2F12C0A65} = {7BB6E1B6-F67A-46BD-A1F6-9D801FC3D58C}
 		{4A16BBDF-64EB-4CDE-97AA-B18C9A44CBB6} = {7BB6E1B6-F67A-46BD-A1F6-9D801FC3D58C}
 		{35ECF662-93CA-413E-9165-98D252E95B41} = {7BB6E1B6-F67A-46BD-A1F6-9D801FC3D58C}
-		{697FB057-534D-4F6D-979B-926CA3B00914} = {30A9C7D0-7A32-42D9-9058-D3DB60451A8C}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4BEB0D4D-BB96-4F5B-ACDD-A634B349E978}
