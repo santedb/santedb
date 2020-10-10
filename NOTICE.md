@@ -28,6 +28,7 @@ SanteSuite contributors include:
 * Mohawk College of Applied Arts and Technology mHealth & eHealth Digital Innovation Centre (MEDIC) (http://mohawkmedic.ca)
 * Fyfe Software Inc. (http://fyfesoftware.ca)
 * SanteSuite Inc. (http://santesuite.com)
+* Nityan Khanna (https://github.com/nityan)
 
 # 2. Third Party Licenses
 
