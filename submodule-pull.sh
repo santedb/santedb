@@ -5,8 +5,8 @@ if [ -f .gitmodules ]; then
 		if [ -d "${S}" ]; then
 			cd "${S}"
 			if [ -f .git ]; then
-				git checkout master
-				git pull
+				git checkout $1
+				git pull --ff-only
 			fi
 			cd ..
 		fi

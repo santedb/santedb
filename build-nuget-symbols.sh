@@ -2,38 +2,16 @@
 
 echo Building Modules
 for D in {"restsrvr","santedb-model","santedb-api","santedb-applets","santedb-bre-js","santedb-bis","santedb-orm","santedb-cdss","santedb-restsvc","santedb-client","reportr","santedb-match","santedb-dc-core"}; do 
-	echo "${D}"
+	echo "Entering ${D}"
 	if [ -d "${D}" ]; then
 		cd "${D}"
 		
-		for S in *.sln; do
-			if [[ "${S}" == *"-linux"* ]]; then
-				echo "Skipping ${S}"
-			else
-				if [ -f "${S%.sln}-linux.sln" ]; then
-					msbuild "${S%.sln}-linux.sln" /t:restore 
-					msbuild "${S%.sln}-linux.sln" /t:rebuild /p:Configuration=Debug
-				else 
-					msbuild "${S}" /t:restore 
-					msbuild "${S}" /t:build /p:Configuration=Debug 
-				fi
-			fi
-		done 
+		dotnet pack --output "." --configuration DEBUG --include-symbols 
+		mv *.nupkg ~/.nugetstaging
+		mv *.snupkg ~/.nugetstaging
+	
 
-		# build nuget
-		for S in *; do
-			if [ -d "${S}" ]; then
-				cd "${S}"
-				
-				for N in *.nuspec; do
-					if [ -f "${N}" ]; then
-						nuget pack -OutputDirectory ~/.nugetstaging -prop Configuration=Debug -Symbols
-					fi 
-				done 
-
-				cd ..
-			fi 
-		done
 		cd ..
+
 	fi
 done
