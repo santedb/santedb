@@ -5,10 +5,16 @@ for D in {"restsrvr","santedb-model","santedb-api","santedb-applets","santedb-br
 	echo "Entering ${D}"
 	if [ -d "${D}" ]; then
 		cd "${D}"
+
 		
-		dotnet pack --output "." --configuration DEBUG --include-symbols 
-		mv *.nupkg ~/.nugetstaging
-		mv *.snupkg ~/.nugetstaging
+		for S in *.sln; do
+			if [ -f "${S%.sln}-linux.sln" ]; then
+				dotnet pack "${S%.sln}-linux.sln" --output "../../SanteDBNugetLocal" --configuration DEBUG --include-symbols
+			else
+		 		dotnet pack "${S}" --output "../../SanteDBNugetLocal" --configuration DEBUG --include-symbols 
+			fi
+			break
+		done
 	
 
 		cd ..
