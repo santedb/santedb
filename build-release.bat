@@ -18,11 +18,11 @@ FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,s
 			PUSHD "%%~pG"
 
 			IF [%2] == [] (
-				dotnet pack --output "%localappdata%\NugetRelease" --configuration Release 
+				dotnet pack --output "%localappdata%\NugetRelease" --configuration Release /p:VersionNumber=%1
 			) ELSE (
 				ECHO Publishing NUPKG
 				DEL bin\publish\*.nupkg /S /Q
-				dotnet pack --configuration Release --output "bin\publish" 
+				dotnet pack --configuration Release --output "bin\publish"  /p:VersionNumber=%1
 				FOR /R %%F IN (*.nupkg) DO (
 					 dotnet nuget push "%%F" -s https://api.nuget.org/v3/index.json -k %2 
 				)
