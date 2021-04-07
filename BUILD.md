@@ -106,10 +106,18 @@ To compile santedb core, first, change to the santedb directory, run a submodule
 ```
 cd santedb
 submodule-pull
-build-nuget-symbols
+build-nuget-symbols VERSION-CODE
 ```
 
 **Note** On linux the commands are ```./submodule-pull.sh``` and ```./build-nuget-symbols.sh```
+
+### Versioning Flags
+
+By default, when you compile the SanteDB services in Visual Studio, they will receive a version of 2.1.0-debug, when you're attempting to build an actual versioned copy of the solution (either server or this repository) you should indicate the version. This is done using the batch file as `build-nuget-symbols version` (for example, to tag the nuget packages as version 2.1.99 `build-nuget-symbold 2.1.99`) or by using the `/p:VersionNumber=X` parameter on the msbuild command:
+
+```
+msbuild /t:restore /t:clean /t:build /p:Configuration=Debug /p:VersionNumber=2.1.99 santedb-server-ext.sln
+```
 
 ## Compile SanteDB Server
 
