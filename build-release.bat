@@ -1,12 +1,13 @@
 @echo off
 echo Will build and push NUGET
 
-FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-applets,santedb-restsvc,santedb-bre-js,santedb-bis,santedb-orm,santedb-cdss,santedb-client,reportr,santedb-match,santedb-dc-core) DO (
+FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-docker,santedb-applets,santedb-restsvc,santedb-bre-js,santedb-mdm,santedb-fhir,santedb-hl7,santedb-openapi,santedb-bis,santedb-orm,santedb-cdss,santedb-client,santedb-cache-memory,santedb-cache-redis,santedb-cache-redis,reportr,santedb-match,santedb-dc-core) DO (
 	IF EXIST "%%P" (
 		PUSHD "%%P"
 		ECHO Preparing assets : LICENSE, NOTICE, etc.
 		COPY ..\LICENSE /y
 		COPY ..\License.rtf /y
+		COPY ..\SanteDB.licenseheader /y
 		ECHO Building %%P
 
 		IF EXIST ".git" (
