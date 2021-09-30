@@ -1,5 +1,6 @@
 @echo off
 echo Will build and push NUGET
+set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
 
 FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-docker,santedb-applets,santedb-restsvc,santedb-bre-js,santedb-mdm,santedb-fhir,santedb-hl7,santedb-openapi,santedb-bis,santedb-orm,santedb-cdss,santedb-client,santedb-cache-memory,santedb-cache-redis,santedb-cache-redis,reportr,santedb-match,santedb-dc-core) DO (
 	IF EXIST "%%P" (
@@ -17,13 +18,29 @@ FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-docker,santedb-applets,sa
 		FOR /R %%G IN (*.csproj) DO (
 			ECHO Packing %%~pG
 			PUSHD "%%~pG"
+			dotnet restore
+			dotnet build --configuration Release /p:VersionNumber=%1
+			echo Signing Assemblies in %%~pP
+			IF EXIST "..\bin" (
+				FOR /R "..\bin\Release" %%Q IN (SanteDB.*.dll) DO (
+					echo Signing %%Q
+					%signtool% sign /sha1 a11164321e30c84bd825ab20225421434622c52a /d "SanteDB Core APIs"  "%%Q"
+				)
+			) ELSE (
+				FOR /R ".\bin\Release" %%Q IN (SanteDB.*.dll) DO (
+					echo Signing %%Q
+					%signtool% sign /sha1 a11164321e30c84bd825ab20225421434622c52a /d "SanteDB Core APIs"  "%%Q"
+				)
+			)
+			echo Signature Complete
 
 			IF [%2] == [] (
-				dotnet pack --output "%localappdata%\NugetRelease" --configuration Release /p:VersionNumber=%1
+				dotnet pack --no-build --output "%localappdata%\NugetRelease" --configuration Release /p:VersionNumber=%1
 			) ELSE (
 				ECHO Publishing NUPKG
 				DEL bin\publish\*.nupkg /S /Q
-				dotnet pack --configuration Release --output "bin\publish"  /p:VersionNumber=%1
+				dotnet pack --no-build --configuration Release --output "bin\publish"  /p:VersionNumber=%1
+				copy bin\publish\*.nupkg "%localappdata%\NugetRelease"
 				FOR /R %%F IN (*.nupkg) DO (
 					 dotnet nuget push "%%F" -s https://api.nuget.org/v3/index.json -k %2 
 				)
