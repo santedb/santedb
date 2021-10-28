@@ -10,6 +10,16 @@ set output="%cd%\dist\%version%"
 set third_party="%cd%\third-party"
 echo Determing Toolchain Environment
 
+for %%P in (%*) do (
+	
+	if [%%P] == [nosign] (
+		set nosign=1
+	)
+	if [%%P] == [notag] (
+		set notag=1
+	)
+)
+
 if [%zip%]==[] (
 	if exist "C:\program files\7-zip\7z.exe" (
 		set zip="C:\program files\7-zip\7z.exe"
@@ -113,9 +123,20 @@ if [%commkey%] == [] (
 echo ========= Build Settings =============
 echo Version = %version%
 echo From Branch = %branchBuild%
-echo Vendor Signing Key = %signkey%
-echo Community (Applet) Signing Key = %commkey%
 echo Output = %output%
+if [%nosign%] == [1] (
+	echo Sign = DISABLED
+) else (
+	echo Sign = ENABLED
+	echo Vendor Key = %signkey%
+	echo Community Key = %commkey%
+)
+if [%notag%] == [1] (
+	echo Tagging = DISABLED
+) else (
+	echo Tagging = ENABLED
+	echo Tag Release = v%version%
+)
 echo ========= TOOLCHAIN ===========
 echo MSBUILD = %msbuild%
 echo INNO SETUP = %inno%
@@ -170,7 +191,11 @@ git submodule init
 git submodule update --remote
 
 call :SUB_BUILD_APPLET applet org.santedb.smpi
-%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% 
+if [%nosign%] == [1] (
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" 
+) else (
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% 
+)
 
 call :SUB_NETBUILD santempi.sln
 
@@ -384,9 +409,14 @@ for /D %%G in (.\*) do (
 if not exist "%output%\applets\sln" (
 	mkdir "%output%\applets\sln"
 )
-%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert
-%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert
 
+if [%nosign%] == [1] (
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" 
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" 
+) else (
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert
+)
 
 call :SUB_GIT_TAG
 
@@ -463,7 +493,11 @@ if not exist "%output%\applets" (
 )
 
 if exist "manifest.xml" (
-	%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install --publish --publish-server=https://packages.santesuite.net
+	if [%nosign%] == [1] (
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
+	) else ( 
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install 
+	)
 )
 popd
 
@@ -545,18 +579,20 @@ exit /B
 
 :SUB_SIGNASM
 
-if [%signkey%]==[] (
-	call :SUB_SIGNASM_SDB_COMM %1
-) else (
-	if exist "..\bin" (
-		for /R "..\bin\Release" %%Q IN (%1*.dll) DO (
-			echo Signing %%Q with vendor key
-			%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-		)
+if [%nosign%] == [] (
+	if [%signkey%]==[] (
+		call :SUB_SIGNASM_SDB_COMM %1
 	) else (
-		for /R ".\bin\Release" %%Q IN (%1*.dll) DO (
-			echo Signing %%Q with vendor key
-			%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+		if exist "..\bin" (
+			for /R "..\bin\Release" %%Q IN (%1*.dll) DO (
+				echo Signing %%Q with vendor key
+				%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+			)
+		) else (
+			for /R ".\bin\Release" %%Q IN (%1*.dll) DO (
+				echo Signing %%Q with vendor key
+				%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+			)
 		)
 	)
 )
@@ -566,15 +602,17 @@ exit /B
 rem Sign Assembly with Community Certificate
 :SUB_SIGNASM_SDB_COMM
 
-if exist "..\bin" (
-	for /R "..\bin\Release" %%Q IN (%1*.dll) DO (
-		echo Signing %%Q with community key
-		%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
-	)
-) else (
-	for /R ".\bin\Release" %%Q IN (%1*.dll) DO (
-		echo Signing %%Q with community key
-		%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+if [%nosign%] == [] (
+	if exist "..\bin" (
+		for /R "..\bin\Release" %%Q IN (%1*.dll) DO (
+			echo Signing %%Q with community key
+			%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+		)
+	) else (
+		for /R ".\bin\Release" %%Q IN (%1*.dll) DO (
+			echo Signing %%Q with community key
+			%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+		)
 	)
 )
 exit /B
@@ -627,22 +665,25 @@ exit /B
 
 :SUB_GIT_TAG
 
-if [%branchBuild%] == [master] (
-	git tag %version%
-	git push --tags
+if [%notag%] == [] (
+	if [%branchBuild%] == [master] (
+		git tag %version%
+		git push --tags
+	) else (
+		echo Will merge %branchBuild% to master at %cd%
+		git checkout %branchBuild%
+		git add *
+		git commit -am "Release %version% built from %branchBuild%"
+		git checkout master
+		git merge %branchBuild%
+		git tag v%version% -m "Version %version% release"
+		git push
+		git push --tags
+		git checkout %branchBuild%
+	)
 ) else (
-	echo Will merge %branchBuild% to master at %cd%
-	git checkout %branchBuild%
-	git add *
-	git commit -am "Release %version% built from %branchBuild%"
-	git checkout master
-	git merge %branchBuild%
-	git tag v%version% -m "Version %version% release"
-	git push
-	git push --tags
-	git checkout %branchBuild%
+	echo ------ MERGING and TAGGING DISABLED
 )
-
 exit /B
 :end 
 
