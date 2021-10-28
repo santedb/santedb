@@ -7,6 +7,7 @@ set branchBuild=%2
 set version=%1
 set signkey=%3
 set output="%cd%\dist\%version%"
+set configuration=Release
 set third_party="%cd%\third-party"
 echo Determing Toolchain Environment
 
@@ -17,6 +18,9 @@ for %%P in (%*) do (
 	)
 	if [%%P] == [notag] (
 		set notag=1
+	)
+	if [%%P] == [debug] (
+		set configuration=Debug
 	)
 )
 
@@ -120,7 +124,15 @@ if [%commkey%] == [] (
 	set commkey=f3bea1ee156254656669f00c03eeafe8befc4441
 )
 
+set target=NugetRelease
+if [%configuration%] == [Debug] (
+	set target=NugetStaging
+	set nosign=1
+	set notag=1
+)
+
 echo ========= Build Settings =============
+echo Mode = %configuration%
 echo Version = %version%
 echo From Branch = %branchBuild%
 echo Output = %output%
@@ -145,7 +157,7 @@ echo SanteDB SDK PAKMAN = %pakman%
 echo Nuget Path = %nuget%
 echo 7-zip = %zip%
 echo ----------------------
-echo ENSURE NUGET HAS A LOCAL PACKAGE REPOSITORY %localappdata%\NugetRelease BEFORE YOU CONTINUE
+echo ENSURE NUGET HAS A LOCAL PACKAGE REPOSITORY %localappdata%\%target% BEFORE YOU CONTINUE
 echo ----------------------
 echo Confirm Build Settings (CTRL+C to cancel)
 pause
@@ -160,9 +172,9 @@ if not exist "%buildPath%" (
 
 pushd "%buildPath%"
 echo Cleaning SanteDB NUGET Release Directory
-rmdir /s /q "%localappdata%\NugetRelease"
-echo Creating SanteDB NUGET Release Directory at %localappdata%\NugetRelease
-mkdir "%localappdata%\NugetRelease"
+rmdir /s /q "%localappdata%\%target%"
+echo Creating SanteDB NUGET Release Directory at %localappdata%\%target%
+mkdir "%localappdata%\%target%"
 
 echo Building Core FROM %cd%
 call :SUB_DO_BUILD_CORE
@@ -573,7 +585,7 @@ exit /B
 echo Building .NET Framework Project %1
 %msbuild%\msbuild %1 /t:clean /p:VersionNumber=%version%
 %msbuild%\msbuild %1 /t:restore /p:VersionNumber=%version%
-%msbuild%\msbuild %1 /t:rebuild /p:configuration=Release /m:1 /p:VersionNumber=%version%
+%msbuild%\msbuild %1 /t:rebuild /p:configuration=%configuration% /m:1 /p:VersionNumber=%version%
 
 exit /B
 
@@ -619,11 +631,11 @@ exit /B
 
 :SUB_NETSTANDARD_PACK
 
-echo Packing %cd% to %localappdata%\NugetRelease
+echo Packing %cd% to %localappdata%\%target%
 
 del bin\publish\*.nupkg /S /Q
 dotnet pack --no-build --configuration Release --output "bin\publish"  /p:VersionNumber=%version%
-copy bin\publish\*.nupkg "%localappdata%\NugetRelease"
+copy bin\publish\*.nupkg "%localappdata%\%target%"
 
 if not exist "%output%\nuget" (
 	mkdir "%output%\nuget"
@@ -643,10 +655,10 @@ exit /B
 
 :SUB_NETPACK
 
-echo Packing %cd% to %localappdata%\NugetRelease
+echo Packing %cd% to %localappdata%\%target%
 
-%nuget% pack -OutputDirectory "bin\Publish" -prop Configuration=Release  -msbuildpath %msbuild% -prop VersionNumber=%version%
-copy bin\publish\*.nupkg "%localappdata%\NugetRelease"
+%nuget% pack -OutputDirectory "bin\Publish" -prop Configuration=%configuration%  -msbuildpath %msbuild% -prop VersionNumber=%version%
+copy bin\publish\*.nupkg "%localappdata%\%target%"
 
 if not exist "%output%\nuget" (
 	mkdir "%output%\nuget"
