@@ -19,6 +19,12 @@ for %%P in (%*) do (
 	if [%%P] == [notag] (
 		set notag=1
 	)
+	if [%%P] == [sign] (
+		set /p signkey=Enter the hash for your signing key:
+	)
+	if [%%P] == [pubnuget] (
+		set /p nugetkey=Enter your nuget key:
+	)
 	if [%%P] == [debug] (
 		set configuration=Debug
 	)
@@ -96,7 +102,7 @@ if [%branchBuild%]==[] (
 )
 
 if not exist "%third_party%\SqlCipher.dll" (
-	echo Missing %third_party%\SqlCipher.dll - Please compile SQLCipher and place in this location
+	echo Missing %third_party%\SqlCipher.dll - Please compile SQLCipher and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
 	set shouldexit=1
 )
 
@@ -140,7 +146,7 @@ if [%nosign%] == [1] (
 	echo Sign = DISABLED
 ) else (
 	echo Sign = ENABLED
-	echo Vendor Key = %signkey%
+	echo Vendor Key = %signkey% - set from signkey environment variable
 	echo Community Key = %commkey%
 )
 if [%notag%] == [1] (
@@ -186,10 +192,35 @@ echo Building Server FROM %cd%
 call :SUB_DO_BUILD_SERVER
 echo Building Server FROM %cd%
 call :SUB_DO_BUILD_SANTEMPI
+echo Building WWW FROM %cd%
+call :SUB_DO_BUILD_WWW
 popd 
 
 goto :end
 
+
+rem ----------------------------- START BUILD WEB DCDR
+:SUB_DO_BUILD_WWW
+
+echo Cloning SanteDB WWW
+git clone https://github.com/santedb/santedb-www
+pushd santedb-www
+git checkout %branchBuild%
+
+
+copy "%third_party%\SqlCipher.dll" ".\Solution Items\SQLCipher.dll"
+copy "%third_party%\vcredist_x86.exe" ".\installsupp\vcredist_x86.exe"
+copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
+
+call :SUB_NETBUILD santedb-www.sln
+
+call :SUB_BUILD_INSTALLER santedb-www.iss
+call :SUB_BUILD_TARBALL santedb-www bin\Release
+
+call :SUB_SIGNASM_SDB_COMM
+call :SUB_BUILD_DOCKER santedb-www
+
+exit /B
 
 rem ----------------------------- START SANTEMPI SERVER BUILD
 :SUB_DO_BUILD_SANTEMPI
@@ -289,6 +320,7 @@ call :SUB_BUILD_TARBALL santedb-sdk bin\Release
 
 popd
 exit /B
+
 
 rem ----------------------------- START SANTEDB CORE API BUILD
 :SUB_DO_BUILD_CORE 
@@ -432,20 +464,23 @@ if [%nosign%] == [1] (
 
 call :SUB_GIT_TAG
 
+rem out of applets
 popd
 
-pushd santedb
-pushd santedb-hl7
-pushd SanteDB.Messaging.HL7
-call :SUB_BUILD_APPLET applet org.santedb.hl7
-popd
-popd
-pushd santedb-fhir
-pushd SanteDB.Messaging.FHIR
-call :SUB_BUILD_APPLET applet org.santedb.fhir
-popd
-popd
-popd
+if exist "santedb" (
+	pushd santedb
+	pushd santedb-hl7
+	pushd SanteDB.Messaging.HL7
+	call :SUB_BUILD_APPLET applet org.santedb.hl7
+	popd
+	popd
+	pushd santedb-fhir
+	pushd SanteDB.Messaging.FHIR
+	call :SUB_BUILD_APPLET applet org.santedb.fhir
+	popd
+	popd
+	popd
+)
 
 exit /B
 
@@ -566,6 +601,7 @@ git pull
 
 call :SUB_NETBUILD_PROJ %1
 call :SUB_SIGNASM SanteDB
+call :SUB_SIGNASM SanteMPI
 
 FOR /R "%cd%" %%G IN (*.nuspec) DO (
 	echo Packing NUGET module %%~pG
@@ -596,12 +632,12 @@ if [%nosign%] == [] (
 		call :SUB_SIGNASM_SDB_COMM %1
 	) else (
 		if exist "..\bin" (
-			for /R "..\bin\Release" %%Q IN (%1*.dll) DO (
+			for /R "..\bin" %%Q IN (%1*.dll) DO (
 				echo Signing %%Q with vendor key
 				%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 			)
 		) else (
-			for /R ".\bin\Release" %%Q IN (%1*.dll) DO (
+			for /R ".\bin" %%Q IN (%1*.dll) DO (
 				echo Signing %%Q with vendor key
 				%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 			)
@@ -633,7 +669,6 @@ exit /B
 
 echo Packing %cd% to %localappdata%\%target%
 
-del bin\publish\*.nupkg /S /Q
 dotnet pack --no-build --configuration Release --output "bin\publish"  /p:VersionNumber=%version%
 copy bin\publish\*.nupkg "%localappdata%\%target%"
 
