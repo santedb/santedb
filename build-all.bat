@@ -5,11 +5,19 @@ setlocal EnableExtensions
 set shouldexit=0
 set branchBuild=%2
 set version=%1
-set signkey=%3
 set output="%cd%\dist\%version%"
+
+if exist %output% (
+	rmdir /s /q %output%
+	mkdir %output%
+)
+
 set configuration=Release
 set third_party="%cd%\third-party"
 echo Determing Toolchain Environment
+set netstandardopt=
+set netopt=
+set keepbuild=
 
 for %%P in (%*) do (
 	
@@ -27,6 +35,12 @@ for %%P in (%*) do (
 	)
 	if [%%P] == [debug] (
 		set configuration=Debug
+	)
+	if [%%P] == [nodocker] (
+		set nodocker=1
+	)
+	if [%%P] == [keepbuild] (
+		set keepbuild=1
 	)
 )
 
@@ -135,6 +149,9 @@ if [%configuration%] == [Debug] (
 	set target=NugetStaging
 	set nosign=1
 	set notag=1
+	set nodocker=1
+	set netstandardopt=--include-symbols
+	set netopt=-symbols
 )
 
 echo ========= Build Settings =============
@@ -142,12 +159,17 @@ echo Mode = %configuration%
 echo Version = %version%
 echo From Branch = %branchBuild%
 echo Output = %output%
+echo Special netstandard options = %netstandardopt%
+echo Special net options = %netopt%
 if [%nosign%] == [1] (
 	echo Sign = DISABLED
 ) else (
 	echo Sign = ENABLED
 	echo Vendor Key = %signkey% - set from signkey environment variable
 	echo Community Key = %commkey%
+)
+if ([%nodocker%] == [1] (
+	echo Docker = DISABLED
 )
 if [%notag%] == [1] (
 	echo Tagging = DISABLED
@@ -190,7 +212,7 @@ echo Building SDK FROM %cd%
 call :SUB_DO_BUILD_SDK
 echo Building Server FROM %cd%
 call :SUB_DO_BUILD_SERVER
-echo Building Server FROM %cd%
+echo Building MPI FROM %cd%
 call :SUB_DO_BUILD_SANTEMPI
 echo Building WWW FROM %cd%
 call :SUB_DO_BUILD_WWW
@@ -217,7 +239,7 @@ call :SUB_NETBUILD santedb-www.sln
 call :SUB_BUILD_INSTALLER santedb-www.iss
 call :SUB_BUILD_TARBALL santedb-www bin\Release
 
-call :SUB_SIGNASM_SDB_COMM
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-www
 
 exit /B
@@ -232,6 +254,8 @@ git checkout %branchBuild%
 
 git submodule init
 git submodule update --remote
+
+echo %version% > release-version
 
 call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
@@ -253,7 +277,7 @@ call :SUB_BUILD_TARBALL santempi bin\Release
 
 
 rem We re-sign for docker since mono doesn't have all authenticode certs
-call :SUB_SIGNASM_SDB_COMM
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-mpi
 
 popd
@@ -271,11 +295,23 @@ git checkout %branchBuild%
 git submodule init
 git submodule update --remote
 
+for /D %%G in (.\*) do (
+	pushd %%G
+	if exist ".git" (
+		echo Pulling %branchBuild% on %%G
+		git checkout %branchBuild%
+		git pull
+	)
+	popd
+)
+	
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
 copy %third_party%\vc2010.exe ".\installer\vc2010.exe"
 
-copy %output%\applets\sln\*.pak SanteDB\Applets /y
+copy %output%\applets\sln\santedb.core.sln.pak SanteDB\Applets /y
+copy %output%\applets\sln\santedb.admin.sln.pak SanteDB\Applets /y
 
+echo %version% > release-version
 call :SUB_NETBUILD santedb-server-ext.sln
 
 call :SUB_BUILD_INSTALLER installer\santedb-icdr.iss
@@ -283,7 +319,7 @@ call :SUB_BUILD_TARBALL santedb-server bin\Release
 
 pushd santedb-docker
 pushd SanteDB.Docker.Server
-call :SUB_SIGNASM_SDB_COMM
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 pushd bin
 pushd release
 ren Data data
@@ -307,9 +343,20 @@ git checkout %branchBuild%
 git submodule init
 git submodule update --remote
 
+for /D %%G in (.\*) do (
+	pushd %%G
+	if exist ".git" (
+		echo Pulling %branchBuild% on %%G
+		git checkout %branchBuild%
+		git pull
+	)
+	popd
+)
+
 copy %third_party%\SqlCipher.dll ".\Solution Items\SQLCipher.dll"
 copy %third_party%\vcredist_x86.exe ".\tools\vcredist_x86.exe"
 
+echo %version% > release-version
 call :SUB_NETBUILD santedb-sdk-ext.sln
 
 rem Copy applet files
@@ -489,8 +536,12 @@ exit /B
 echo Will build docker container %1 from %cd%
 set pkgname=%1
 
-docker build --no-cache -t santesuite/%pkgname%:%version% .
-docker build --no-cache -t santesuite/%pkgname% .
+if [%nodocker%] == [1] (
+	echo DOCKER BUILDS DISABLED
+) else (
+	docker build --no-cache -t santesuite/%pkgname%:%version% .
+	docker build --no-cache -t santesuite/%pkgname% .
+)
 
 exit /B
 
@@ -559,7 +610,7 @@ for %%P IN (%*) do (
 		pushd %%P
 		echo Will build project in %cd%
 		call :SUB_NETSTANDARD_BUILD_PROJ
-		call :SUB_SIGNASM
+		call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 		call :SUB_NETSTANDARD_PACK
 		popd 
 	) else (
@@ -587,7 +638,7 @@ exit /B
 echo Building %cd% 
 
 dotnet restore /p:VersionNumber=%version%
-dotnet build --configuration Release /p:VersionNumber=%version%
+dotnet build --configuration %configuration% /p:VersionNumber=%version%
 
 exit /B
 
@@ -600,8 +651,7 @@ git checkout %branchbuild%
 git pull
 
 call :SUB_NETBUILD_PROJ %1
-call :SUB_SIGNASM SanteDB
-call :SUB_SIGNASM SanteMPI
+call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 
 FOR /R "%cd%" %%G IN (*.nuspec) DO (
 	echo Packing NUGET module %%~pG
@@ -629,17 +679,27 @@ exit /B
 
 if [%nosign%] == [] (
 	if [%signkey%]==[] (
-		call :SUB_SIGNASM_SDB_COMM %1
+		call :SUB_SIGNASM_SDB_COMM %*
 	) else (
-		if exist "..\bin" (
-			for /R "..\bin" %%Q IN (%1*.dll) DO (
-				echo Signing %%Q with vendor key
-				%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-			)
-		) else (
-			for /R ".\bin" %%Q IN (%1*.dll) DO (
-				echo Signing %%Q with vendor key
-				%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+		for %%P IN (%*) do (
+			if exist "..\bin" (
+				for /R "..\bin" %%Q IN (%%P*.dll) DO (
+					echo Signing %%Q with vendor key
+					%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+				)
+				for /R "..\bin" %%Q IN (*.exe) DO (
+					echo Signing %%Q with vendor key
+					%signtool% sign /sha1 %signkey% /d "SanteDB"  "%%Q"
+				)
+			) else (
+				for /R ".\bin" %%Q IN (%%P*.dll) DO (
+					echo Signing %%Q with vendor key
+					%signtool% sign /sha1 %signkey% /d "SanteDB APIs"  "%%Q"
+				)
+				for /R ".\bin" %%Q IN (*.exe) DO (
+					echo Signing %%Q with vendor key
+					%signtool% sign /sha1 %signkey% /d "SanteDB"  "%%Q"
+				)
 			)
 		)
 	)
@@ -651,15 +711,25 @@ rem Sign Assembly with Community Certificate
 :SUB_SIGNASM_SDB_COMM
 
 if [%nosign%] == [] (
-	if exist "..\bin" (
-		for /R "..\bin\Release" %%Q IN (%1*.dll) DO (
-			echo Signing %%Q with community key
-			%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
-		)
-	) else (
-		for /R ".\bin\Release" %%Q IN (%1*.dll) DO (
-			echo Signing %%Q with community key
-			%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+	for %%P IN (%*) do (
+		if exist "..\bin" (
+			for /R "..\bin" %%Q IN (%%P*.dll) DO (
+				echo Signing %%Q with community key
+				%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+			)
+			for /R "..\bin" %%Q IN (*.exe) DO (
+				echo Signing %%Q with community key
+				%signtool% sign /sha1 %commkey% /d "SanteDB"  "%%Q"
+			)
+		) else (
+			for /R ".\bin" %%Q IN (%%P*.dll) DO (
+				echo Signing %%Q with community key
+				%signtool% sign /sha1 %commkey% /d "SanteDB APIs"  "%%Q"
+			)
+			for /R ".\bin" %%Q IN (*.exe) DO (
+				echo Signing %%Q with community key
+				%signtool% sign /sha1 %commkey% /d "SanteDB"  "%%Q"
+			)
 		)
 	)
 )
@@ -669,13 +739,15 @@ exit /B
 
 echo Packing %cd% to %localappdata%\%target%
 
-dotnet pack --no-build --configuration Release --output "bin\publish"  /p:VersionNumber=%version%
+dotnet pack --no-build --configuration %configuration% --output "bin\publish"  /p:VersionNumber=%version% %netstandardopt%
 copy bin\publish\*.nupkg "%localappdata%\%target%"
+copy bin\publish\*.snupkg "%localappdata%\%target%"
 
 if not exist "%output%\nuget" (
 	mkdir "%output%\nuget"
 )
 copy bin\publish\*.nupkg "%output%\nuget"
+copy bin\publish\*.snupkg "%output%\nuget"
 
 if [%nugetkey%]==[] (
 	echo Will not push to NUGET if you want to push to NUGET set nugetkey environment variable
@@ -692,13 +764,15 @@ exit /B
 
 echo Packing %cd% to %localappdata%\%target%
 
-%nuget% pack -OutputDirectory "bin\Publish" -prop Configuration=%configuration%  -msbuildpath %msbuild% -prop VersionNumber=%version%
+%nuget% pack -OutputDirectory "bin\Publish" -prop Configuration=%configuration%  -msbuildpath %msbuild% -prop VersionNumber=%version% %netopt%
 copy bin\publish\*.nupkg "%localappdata%\%target%"
+copy bin\publish\*.snupkg "%localappdata%\%target%"
 
 if not exist "%output%\nuget" (
 	mkdir "%output%\nuget"
 )
 copy bin\publish\*.nupkg "%output%\nuget"
+copy bin\publish\*.snupkg "%output%\nuget"
 
 if [%nugetkey%]==[] (
 	echo Will not push to NUGET if you want to push to NUGET set nugetkey environment variable
@@ -719,11 +793,17 @@ if [%notag%] == [] (
 	) else (
 		echo Will merge %branchBuild% to master at %cd%
 		git checkout %branchBuild%
+		git pull
+		echo %version% > release-version
+		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 		git add *
-		git commit -am "Release %version% built from %branchBuild%"
+		git commit -am "BuildBot: Added release version"
 		git checkout master
-		git merge %branchBuild%
-		git tag v%version% -m "Version %version% release"
+		git merge %branchBuild% 
+		git checkout --theirs *
+		git add *
+		git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
+		git tag v%version% -m "BuildBot: Version %version% release"
 		git push
 		git push --tags
 		git checkout %branchBuild%
@@ -734,9 +814,16 @@ if [%notag%] == [] (
 exit /B
 :end 
 
-if exist "%buildPath%" (
-	echo Cleaning up build directory %buildPath%
-	rmdir /s /q "%buildPath%"
+if [%keepbuild%] == [1] (
+	echo Build is kept at %buildPath%
+) else (
+	if exist "%buildPath%" (
+		echo Cleaning up build directory %buildPath%
+		popd
+		popd
+		popd
+		rmdir /s /q "%buildPath%"
+	)
 )
 
 echo Build Release Complete
