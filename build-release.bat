@@ -18,7 +18,7 @@ FOR %%P IN (restsrvr,santedb-model,santedb-api,santedb-docker,santedb-applets,sa
 		FOR /R %%G IN (*.csproj) DO (
 			ECHO Packing %%~pG
 			PUSHD "%%~pG"
-			dotnet restore
+			dotnet restore /p:VersionNumber=%1
 			dotnet build --configuration Release /p:VersionNumber=%1
 			echo Signing Assemblies in %%~pP
 			IF EXIST "..\bin" (
