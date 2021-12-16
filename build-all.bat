@@ -320,7 +320,34 @@ echo %version% > release-version
 call :SUB_NETBUILD santedb-server-ext.sln
 
 call :SUB_BUILD_INSTALLER installer\santedb-icdr.iss
+call :SUB_BUILD_INSTALLER installer\sdbac.iss
 call :SUB_BUILD_TARBALL santedb-server bin\Release
+
+
+mkdir "sdbac-tmp"
+copy "%cd%\bin\release\MohawkCollege.Util.Console.Parameters.dll" "sdbac-tmp"
+copy "%cd%\bin\release\Newtonsoft.Json.dll" "sdbac-tmp"
+copy "%cd%\bin\release\RestSrvr.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Configuration.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Core.Api.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Core.Applets.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Core.Model.AMI.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Core.Model.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Docker.Core.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Messaging.AMI.Client.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Messaging.HDSI.Client.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Rest.Common.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Server.AdminConsole.Api.dll" "sdbac-tmp"
+copy "%cd%\bin\release\SanteDB.Server.Core.dll" "sdbac-tmp"
+copy "%cd%\bin\release\sdbac.exe" "sdbac-tmp"
+copy "%cd%\bin\release\sdbac.exe.config" "sdbac-tmp"
+copy "%cd%\bin\release\SharpCompress.dll" "sdbac-tmp"
+copy "%cd%\bin\release\System.Buffers.dll" "sdbac-tmp"
+copy "%cd%\bin\release\System.Collections.Concurrent.dll" "sdbac-tmp"
+copy "%cd%\bin\release\System.Collections.dll" "sdbac-tmp"
+copy "%cd%\bin\release\System.Memory.dll" "sdbac-tmp"
+copy "%cd%\bin\release\System.Runtime.CompilerServices.Unsafe.dll" "sdbac-tmp"
+call :SUB_BUILD_TARBALL sdbac sdbac-tmp
 
 pushd santedb-docker
 pushd SanteDB.Docker.Server
@@ -809,6 +836,7 @@ if [%notag%] == [] (
 		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 		git add *
 		git commit -am "BuildBot: Added release version"
+		git push
 		git checkout master
 		git merge %branchBuild% 
 		git checkout --theirs *
