@@ -135,6 +135,11 @@ if not exist "%third_party%\vcredist_x86.exe" (
 	set shouldexit=1
 )
 
+if not exist "%third_party%\dos2unix.exe" (
+	echo Mssing %third_party%\dos2unix.exe - Please obtain the DOS2UNIX binary from https://waterlan.home.xs4all.nl/dos2unix.html#DOS2UNIX
+	set shouldexit=1
+)
+
 if [%shouldexit%] == [1] (
 	echo Please correct issues and re-run
 	goto :end
@@ -566,6 +571,12 @@ xcopy /I /Y "%2\plugins\*.*" "%pkgname%-%version%\plugins"
 xcopy /I /Y "%2\matching\*.*" "%pkgname%-%version%\matching"
 xcopy /I /Y "%2\data\*.*" "%pkgname%-%version%\data"
 xcopy /I /Y "%2\applets\*.*" "%pkgname%-%version%\applets"
+
+FOR /R "%pkgname%-%version%" %%G IN (*.sh) DO (
+	echo Converting line endings in %%G
+	"%third_party%\dos2unix.exe" "%%G"
+)
+
 
 %zip% a -r -ttar "%output%\%pkgname%-%version%.tar" "%pkgname%-%version%"
 %zip% a -r -tzip "%output%\%pkgname%-%version%.zip" "%pkgname%-%version%"
