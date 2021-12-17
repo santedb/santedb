@@ -440,6 +440,7 @@ popd
 echo Building SanteDB API
 pushd santedb-api
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Api"
+
 popd 
 
 echo Building SanteDB Docker Core
