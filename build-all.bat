@@ -242,6 +242,7 @@ copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
 call :SUB_NETBUILD santedb-www.sln
 
 call :SUB_BUILD_INSTALLER santedb-www.iss
+copy installer\install.sh bin\Release
 call :SUB_BUILD_TARBALL santedb-www bin\Release
 
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
