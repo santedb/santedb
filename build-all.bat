@@ -439,6 +439,7 @@ popd
 
 echo Building SanteDB API
 pushd santedb-api
+echo Calling build pack
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Api"
 
 popd 
@@ -587,8 +588,8 @@ set pkgname=%1
 if [%nodocker%] == [1] (
 	echo DOCKER BUILDS DISABLED
 ) else (
-	docker build --no-cache -t santesuite/%pkgname%:%version% .
-	docker build --no-cache -t santesuite/%pkgname% .
+	docker build --pull=false -t santesuite/%pkgname%:%version% .
+	docker build --pull=false -t santesuite/%pkgname% .
 )
 
 exit /B
