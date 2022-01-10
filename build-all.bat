@@ -18,6 +18,7 @@ echo Determing Toolchain Environment
 set netstandardopt=
 set netopt=
 set keepbuild=
+set addlcerts=
 
 for %%P in (%*) do (
 	
@@ -115,6 +116,10 @@ if [%branchBuild%]==[] (
 	set branchBuild=develop
 )
 
+if exist "%cd%\inter.cer" (
+	set addlcerts=%cd%\inter.cer
+)
+
 if not exist "%third_party%\SqlCipher.dll" (
 	echo Missing %third_party%\SqlCipher.dll - Please compile SQLCipher and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
 	set shouldexit=1
@@ -166,12 +171,14 @@ echo From Branch = %branchBuild%
 echo Output = %output%
 echo Special netstandard options = %netstandardopt%
 echo Special net options = %netopt%
+
 if [%nosign%] == [1] (
 	echo Sign = DISABLED
 ) else (
 	echo Sign = ENABLED
 	echo Vendor Key = %signkey% - set from signkey environment variable
 	echo Community Key = %commkey%
+	echo Additional Certificate Chain = %addlcerts% (set from inter.cer file)
 )
 if ([%nodocker%] == [1] (
 	echo Docker = DISABLED
@@ -276,9 +283,13 @@ if not exist "dist" (
 	mkdir dist
 )
 
+
 copy %output%\applets\sln\santempi.sln.pak .\dist\
 
 call :SUB_BUILD_INSTALLER install\santempi-install.iss
+
+xcopy ..\santedb-server\bin\Release\*.* bin\Release /S /Y
+
 call :SUB_BUILD_TARBALL santempi bin\Release
 
 
@@ -322,6 +333,10 @@ call :SUB_NETBUILD santedb-server-ext.sln
 
 call :SUB_BUILD_INSTALLER installer\santedb-icdr.iss
 call :SUB_BUILD_INSTALLER installer\sdbac.iss
+
+
+echo Copying LINUX Install Script
+copy .\installer\install.sh bin\Release\install.sh
 call :SUB_BUILD_TARBALL santedb-server bin\Release
 
 
@@ -588,17 +603,26 @@ copy "%2\*.dll" "%pkgname%-%version%" /y
 copy "%2\*.exe" "%pkgname%-%version%" /y
 copy "%2\*.pak" "%pkgname%-%version%" /y
 copy "%2\*.xml" "%pkgname%-%version%" /y
+copy "%2\*.bat" "%pkgname%-%version%" /y
+copy "%2\*.sh" "%pkgname%-%version%" /y
 copy "%2\*.fdb" "%pkgname%-%version%" /y
+
 copy "%2\lib\win32\x86\git2-106a5f2.dll" "%pkgname%-%version%" /y
-xcopy /I /Y "%2\Schema\*.*" "%pkgname%-%version%\Schema"
-xcopy /I /Y "%2\Config\*.*" "%pkgname%-%version%\Config"
-xcopy /I /Y "%2\Sample\*.*" "%pkgname%-%version%\Sample"
-xcopy /I /Y "%2\Engine\*.*" "%pkgname%-%version%\Engine"
-xcopy /I /Y "%2\Sample\*.*" "%pkgname%-%version%\Sample"
-xcopy /I /Y "%2\plugins\*.*" "%pkgname%-%version%\plugins"
-xcopy /I /Y "%2\matching\*.*" "%pkgname%-%version%\matching"
-xcopy /I /Y "%2\data\*.*" "%pkgname%-%version%\data"
-xcopy /I /Y "%2\applets\*.*" "%pkgname%-%version%\applets"
+xcopy /I /S  /Y "%2\Schema\*.*" "%pkgname%-%version%\schema"
+xcopy /I /S /Y "%2\Config\*.*" "%pkgname%-%version%\config"
+xcopy /I  /S /Y "%2\Sample\*.*" "%pkgname%-%version%\sample"
+xcopy /I /S /Y "%2\Engine\*.*" "%pkgname%-%version%\engine"
+xcopy /I /S /Y "%2\Sample\*.*" "%pkgname%-%version%\sample"
+xcopy /I /S /Y "%2\plugins\*.*" "%pkgname%-%version%\plugins"
+xcopy /I /S /Y "%2\matching\*.*" "%pkgname%-%version%\matching"
+xcopy /I /S /Y "%2\data\*.*" "%pkgname%-%version%\data"
+xcopy /I /S /Y "%2\applets\*.*" "%pkgname%-%version%\applets"
+
+move %pkgname%-%version%\Data %pkgname%-%version%\_data
+move %pkgname%-%version%\_data %pkgname%-%version%\data
+
+move %pkgname%-%version%\Config %pkgname%-%vesion%\_config
+move %pkgname%-%version%\_config %pkgname%-%vesion%\config
 
 FOR /R "%pkgname%-%version%" %%G IN (*.sh) DO (
 	echo Converting line endings in %%G
@@ -611,6 +635,7 @@ FOR /R "%pkgname%-%version%" %%G IN (*.sh) DO (
 %zip% a -tbzip2 "%output%\%pkgname%-%version%.tar.bz2" "%output%\%pkgname%-%version%.tar"
 %zip% a -tgzip "%output%\%pkgname%-%version%.tar.gz" "%output%\%pkgname%-%version%.tar"
 
+rmdir /s /q %pkgname%-%version%
 exit /B
 
 :SUB_BUILD_INSTALLER
@@ -724,20 +749,36 @@ if [%nosign%] == [] (
 			if exist "..\bin" (
 				for /R "..\bin" %%Q IN (%%P*.dll) DO (
 					echo Signing %%Q with vendor key
-					%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					if [%addlcerts%] == [] (
+						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					) else (
+						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q" 
+					)
 				)
 				for /R "..\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
-					%signtool% sign /sha1 %signkey% /d "SanteDB"  "%%Q"
+					if [%addlcerts%] == [] (
+						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					) else (
+						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+					)
 				)
 			) else (
 				for /R ".\bin" %%Q IN (%%P*.dll) DO (
 					echo Signing %%Q with vendor key
-					%signtool% sign /sha1 %signkey% /d "SanteDB APIs"  "%%Q"
+					if [%addlcerts%] == [] (
+						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					) else (
+						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+					)
 				)
 				for /R ".\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
-					%signtool% sign /sha1 %signkey% /d "SanteDB"  "%%Q"
+					if [%addlcerts%] == [] (
+						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					) else (
+						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+					)
 				)
 			)
 		)
