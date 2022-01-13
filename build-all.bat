@@ -249,7 +249,9 @@ copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
 call :SUB_NETBUILD santedb-www.sln
 
 call :SUB_BUILD_INSTALLER santedb-www.iss
-copy installer\install.sh bin\Release
+copy installsupp\install.sh bin\Release
+copy %addlcerts% bin\Release\inter.cer
+
 call :SUB_BUILD_TARBALL santedb-www bin\Release
 
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
@@ -288,6 +290,11 @@ copy %output%\applets\sln\santempi.sln.pak .\dist\
 
 call :SUB_BUILD_INSTALLER install\santempi-install.iss
 
+if not exist "bin\Release\dist" (
+	mkdir bin\Release\dist
+)
+
+copy dist\santempi.sln.pak bin\Release\applets
 xcopy ..\santedb-server\bin\Release\*.* bin\Release /S /Y
 
 call :SUB_BUILD_TARBALL santempi bin\Release
@@ -337,6 +344,7 @@ call :SUB_BUILD_INSTALLER installer\sdbac.iss
 
 echo Copying LINUX Install Script
 copy .\installer\install.sh bin\Release\install.sh
+copy %addlcerts% bin\Release\inter.cer
 call :SUB_BUILD_TARBALL santedb-server bin\Release
 
 
@@ -606,6 +614,7 @@ copy "%2\*.xml" "%pkgname%-%version%" /y
 copy "%2\*.bat" "%pkgname%-%version%" /y
 copy "%2\*.sh" "%pkgname%-%version%" /y
 copy "%2\*.fdb" "%pkgname%-%version%" /y
+copy "%2\*.cer" "%pkgname%-%version%" /y
 
 copy "%2\lib\win32\x86\git2-106a5f2.dll" "%pkgname%-%version%" /y
 xcopy /I /S  /Y "%2\Schema\*.*" "%pkgname%-%version%\schema"
@@ -752,6 +761,7 @@ if [%nosign%] == [] (
 					if [%addlcerts%] == [] (
 						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
+						echo Signing with additional certs from %addlcerts%
 						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q" 
 					)
 				)
@@ -760,6 +770,7 @@ if [%nosign%] == [] (
 					if [%addlcerts%] == [] (
 						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
+						echo Signing with additional certs from %addlcerts%
 						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
@@ -769,6 +780,7 @@ if [%nosign%] == [] (
 					if [%addlcerts%] == [] (
 						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
+						echo Signing with additional certs from %addlcerts%
 						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
@@ -777,6 +789,7 @@ if [%nosign%] == [] (
 					if [%addlcerts%] == [] (
 						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
+						echo Signing with additional certs from %addlcerts%
 						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
