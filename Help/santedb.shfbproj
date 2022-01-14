@@ -1,0 +1,227 @@
+﻿<Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <!-- Import the common properties to support NuGet restore -->
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <!-- The configuration and platform will be used to determine which assemblies to include from solution and
+				 project documentation sources -->
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{2c22315c-1b17-4fe2-b22c-0f6c551d7774}</ProjectGuid>
+    <SHFBSchemaVersion>2017.9.26.0</SHFBSchemaVersion>
+    <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
+    <AssemblyName>Documentation</AssemblyName>
+    <RootNamespace>Documentation</RootNamespace>
+    <Name>Documentation</Name>
+    <!-- SHFB properties -->
+    <FrameworkVersion>.NET Framework 4.7.2</FrameworkVersion>
+    <OutputPath>output\</OutputPath>
+    <HtmlHelpName>santedb-help</HtmlHelpName>
+    <Language>en-US</Language>
+    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
+    <SyntaxFilters>Standard</SyntaxFilters>
+    <PresentationStyle>VS2013</PresentationStyle>
+    <CleanIntermediates>True</CleanIntermediates>
+    <KeepLogFile>True</KeepLogFile>
+    <DisableCodeBlockComponent>False</DisableCodeBlockComponent>
+    <IndentHtml>False</IndentHtml>
+    <BuildAssemblerVerbosity>OnlyWarningsAndErrors</BuildAssemblerVerbosity>
+    <SaveComponentCacheCapacity>100</SaveComponentCacheCapacity>
+    <HelpTitle>SanteDB Clinical Data Repository .NET API Reference</HelpTitle>
+    <HelpFileVersion>2.1.125</HelpFileVersion>
+    <NamingMethod>MemberName</NamingMethod>
+    <ContentPlacement>BelowNamespaces</ContentPlacement>
+    <RootNamespaceContainer>True</RootNamespaceContainer>
+    <NamespaceGrouping>True</NamespaceGrouping>
+    <MaximumGroupParts>2</MaximumGroupParts>
+    <Preliminary>False</Preliminary>
+    <CopyrightHref>http://santesuite.com</CopyrightHref>
+    <CopyrightText>Copyright %28C%29 2021 SanteSuite Inc. and the SanteSuite Contributors %28see NOTICE.md%29</CopyrightText>
+    <FeedbackEMailAddress>info%40santesuite.com</FeedbackEMailAddress>
+    <SdkLinkTarget>Blank</SdkLinkTarget>
+    <HtmlSdkLinkType>Msdn</HtmlSdkLinkType>
+    <BinaryTOC>True</BinaryTOC>
+    <IncludeFavorites>False</IncludeFavorites>
+    <WebsiteSdkLinkType>Msdn</WebsiteSdkLinkType>
+    <AppendMarkdownFileExtensionsToUrls>True</AppendMarkdownFileExtensionsToUrls>
+    <CatalogProductId>SDB</CatalogProductId>
+    <CatalogVersion>100</CatalogVersion>
+    <CatalogName>SanteDB</CatalogName>
+    <VendorName>SanteSuite Inc</VendorName>
+    <ProductTitle>SanteDB Clinical Data Repository</ProductTitle>
+    <TocOrder>-1</TocOrder>
+    <TocParentId>-1</TocParentId>
+    <TocParentVersion>100</TocParentVersion>
+    <TopicVersion>100</TopicVersion>
+    <MSHelpViewerSdkLinkType>Msdn</MSHelpViewerSdkLinkType>
+    <DocumentationSources>
+      <DocumentationSource sourceFile="..\restsrvr\RestSrvr\RestSrvr.csproj" />
+<DocumentationSource sourceFile="..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj" />
+<DocumentationSource sourceFile="..\santedb-applets\SanteDB.Core.Applets\SanteDB.Core.Applets.csproj" />
+<DocumentationSource sourceFile="..\santedb-bis\SanteDB.BI\SanteDB.BI.csproj" />
+<DocumentationSource sourceFile="..\santedb-bre-js\SanteDB.BusinessRules.JavaScript\SanteDB.BusinessRules.JavaScript.csproj" />
+<DocumentationSource sourceFile="..\santedb-cdss\SanteDB.Cdss.Xml\SanteDB.Cdss.Xml.csproj" />
+<DocumentationSource sourceFile="..\santedb-docker\SanteDB.Docker.Core\SanteDB.Docker.Core.csproj" />
+<DocumentationSource sourceFile="..\santedb-fhir\SanteDB.Messaging.FHIR\SanteDB.Messaging.FHIR.csproj" />
+<DocumentationSource sourceFile="..\santedb-hl7\SanteDB.Messaging.HL7\SanteDB.Messaging.HL7.csproj" />
+<DocumentationSource sourceFile="..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj" />
+<DocumentationSource sourceFile="..\santedb-orm\SanteDB.OrmLite\SanteDB.OrmLite.csproj" />
+<DocumentationSource sourceFile="..\santedb-cache-memory\SanteDB.Caching.Memory\SanteDB.Caching.Memory.csproj" />
+<DocumentationSource sourceFile="..\santedb-cache-redis\SanteDB.Caching.Redis\SanteDB.Caching.Redis.csproj" />
+<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Ags\SanteDB.DisconnectedClient.Ags.csproj" />
+<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Core.SQLite\SanteDB.DisconnectedClient.SQLite.csproj" />
+<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Core\SanteDB.DisconnectedClient.Core.csproj" />
+<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.UI\SanteDB.DisconnectedClient.UI.csproj" />
+<DocumentationSource sourceFile="..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj" />
+<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.AMI\SanteDB.Core.Model.AMI.csproj" />
+<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.RISI\SanteDB.Core.Model.RISI.csproj" />
+<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.ViewModelSerializers\SanteDB.Core.Model.ViewModelSerializers.csproj" />
+<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.AMI\SanteDB.Rest.AMI.csproj" />
+<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
+<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.HDSI\SanteDB.Rest.HDSI.csproj" />
+<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.AMI.Client\SanteDB.Messaging.AMI.Client.csproj" />
+<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj" />
+<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.RISI.Client\SanteDB.Messaging.RISI.Client.csproj" /></DocumentationSources>
+    <WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
+    <RootNamespaceTitle>SanteDB CDR .NET API</RootNamespaceTitle>
+    <ProjectSummary>&amp;lt%3bp&amp;gt%3bSanteDB Clinical Data Repository %28CDR%29 .NET API Documentation. &amp;lt%3b/p&amp;gt%3b
+&amp;lt%3bp&amp;gt%3bThis documentation was generated using the C# API documentation comments. Because SanteDB&amp;#39%3bs core API is large, we have curated a list of helpful links for quick reference:&amp;lt%3b/p&amp;gt%3b
+&amp;lt%3bul&amp;gt%3b
+   &amp;lt%3bli&amp;gt%3b&amp;lt%3ba href=&amp;quot%3bN_SanteDB_Core_Model.htm&amp;quot%3b&amp;gt%3bSanteDB iCDR Model&amp;lt%3b/a&amp;gt%3b - Reference documentation for the &amp;lt%3ba href=&amp;quot%3bhttps://help.santesuite.org/santedb/architecture/data-and-information-architecture/conceptual-data-model&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bSanteDB Business Model&amp;lt%3b/a&amp;gt%3b&amp;lt%3b/li&amp;gt%3b
+   &amp;lt%3bli&amp;gt%3b&amp;lt%3ba href=&amp;quot%3bN_SanteDB_Core_Auditing.htm&amp;quot%3b&amp;gt%3bAudit API&amp;lt%3b/a&amp;gt%3b - Reference documentation for the SanteDB Auditing utility classes&amp;lt%3b/li&amp;gt%3b
+   &amp;lt%3bli&amp;gt%3b&amp;lt%3ba href=&amp;quot%3bN_SanteDB_Messaging_FHIR_Extensions.htm&amp;quot%3b&amp;gt%3bFHIR Extension API&amp;lt%3b/a&amp;gt%3b - Reference documentation for the &amp;lt%3ba href=&amp;quot%3bhttps://help.santesuite.org/developers/service-apis/hl7-fhir/extending-fhir-interfaces&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bSanteDB FHIR Extension Methods&amp;lt%3b/a&amp;gt%3b which allow you to add your own FHIR features&amp;lt%3b/li&amp;gt%3b
+   &amp;lt%3bli&amp;gt%3b&amp;lt%3ba href=&amp;quot%3bT_SanteDB_Messaging_HL7_IHL7MessageHandler.htm&amp;quot%3b&amp;gt%3bHL7 Message Handler&amp;lt%3b/a&amp;gt%3b and &amp;lt%3ba href=&amp;quot%3bT_SanteDB_Messaging_HL7_Segments_ISegmentHandler.htm&amp;quot%3b&amp;gt%3bHL7 Segment Handler&amp;lt%3b/a&amp;gt%3b  - For implementing custom HL7v2 messages and segments&amp;lt%3b/li&amp;gt%3b
+   &amp;lt%3bli&amp;gt%3b&amp;lt%3ba href=&amp;quot%3bN_SanteDB_Docker_Core.htm&amp;quot%3b&amp;gt%3bDocker Features API&amp;lt%3b/a&amp;gt%3b - Reference documentation for creating &amp;lt%3ba href=&amp;quot%3bhttps://help.santesuite.org/developers/server-plugins/implementing-.net-features/configuration/custom-docker-feature-configuration&amp;quot%3b target=&amp;quot%3b_blank&amp;quot%3b&amp;gt%3bCustom Docker Features&amp;lt%3b/a&amp;gt%3b&amp;lt%3b/li&amp;gt%3b
+&amp;lt%3b/ul&amp;gt%3b
+&amp;lt%3bp&amp;gt%3bFor getting started information, please consult the &amp;lt%3ba href=&amp;quot%3bhttps://help.santesuite.org/developers/server-plugins&amp;quot%3b&amp;gt%3bSanteDB Wiki&amp;lt%3b/a&amp;gt%3b for information on using the .NET API&amp;lt%3b/p&amp;gt%3b
+
+</ProjectSummary>
+    <MissingTags>Summary, Parameter, Returns, AutoDocumentCtors, TypeParameter, AutoDocumentDispose</MissingTags>
+    <ComponentConfigurations>
+      <ComponentConfig id="Code Block Component" enabled="True" xmlns="">
+        <component id="Code Block Component">
+          <!-- Base path for relative filenames in source attributes (optional) -->
+          <basePath value="{@HtmlEncProjectFolder}" />
+          <!-- Base output paths for the files (required).  These should match the parent folder of the output path
+	 of the HTML files (see each of the SaveComponent instances in the configuration files). -->
+          <outputPaths>
+	{@HelpFormatOutputPaths}
+</outputPaths>
+          <!-- Allow missing source files (Optional).  If omitted, it will generate errors if referenced source files
+	 are missing. -->
+          <allowMissingSource value="false" />
+          <!-- Remove region markers from imported code blocks.  If omitted, region markers in imported code blocks
+	 are left alone. -->
+          <removeRegionMarkers value="false" />
+          <!-- Code colorizer options (required).
+	 Attributes:
+		Language syntax configuration file (required)
+		XSLT style sheet file (required)
+		CSS style sheet file (required)
+		Script file (required)
+		Disabled (optional, leading whitespace normalization only)
+		Default language (optional)
+		Enable line numbering (optional)
+		Enable outlining (optional)
+		Keep XML comment "see" tags within the code (optional)
+		Tab size override (optional, 0 = Use syntax file setting)
+		Use language name as default title (optional) -->
+          <colorizer syntaxFile="{@CoreComponentsFolder}Colorizer\highlight.xml" styleFile="{@CoreComponentsFolder}Colorizer\highlight.xsl" stylesheet="{@CoreComponentsFolder}Colorizer\highlight.css" scriptFile="{@CoreComponentsFolder}Colorizer\highlight.js" disabled="{@DisableCodeBlockComponent}" language="cs" numberLines="false" outlining="false" keepSeeTags="false" tabSize="0" defaultTitle="true" />
+        </component>
+      </ComponentConfig>
+    </ComponentConfigurations>
+    <TransformComponentArguments>
+      <Argument Key="logoFile" Value="icon.png" xmlns="" />
+      <Argument Key="logoHeight" Value="" xmlns="" />
+      <Argument Key="logoWidth" Value="" xmlns="" />
+      <Argument Key="logoAltText" Value="" xmlns="" />
+      <Argument Key="logoPlacement" Value="left" xmlns="" />
+      <Argument Key="logoAlignment" Value="left" xmlns="" />
+      <Argument Key="logoUrl" Value="" xmlns="" />
+      <Argument Key="maxVersionParts" Value="" xmlns="" />
+      <Argument Key="defaultLanguage" Value="cs" xmlns="" />
+      <Argument Key="includeEnumValues" Value="true" xmlns="" />
+      <Argument Key="baseSourceCodeUrl" Value="" xmlns="" />
+      <Argument Key="requestExampleUrl" Value="" xmlns="" />
+    </TransformComponentArguments>
+    <NamespaceSummaries>
+      <NamespaceSummaryItem name="RestSrvr (Group)" isGroup="True" isDocumented="True">The RestSrvr namespace contains the cross-platform implementation of the basic REST-based API host. This namespace contains the &lt;a href="https://github.com/santedb/restsrvr/blob/master/README.md" target="_blank"&gt;RestSrvr&lt;/a&gt; classes.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="RestSrvr" isDocumented="True">Core RestSrvr project namespace.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="RestSrvr.Attributes" isDocumented="True">Attributes which control the manner in which requests are routed to the Rest API contract definitions.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="RestSrvr.Behaviors" isDocumented="True">Base behaviors (operation and endpoint) for the core RestSrvr project.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="RestSrvr.Bindings" isDocumented="True">Core bindings (HTTP) for the RestSrvr project</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="RestSrvr.Exceptions" isDocumented="True">Exceptions thrown and handled by the RestSrvr application</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB (Group)" isGroup="True" isDocumented="True">&lt;p&gt;The SanteDB root namespace contains the entirety of the core .NET API for both &lt;strong&gt;SanteDB iCDR&lt;/strong&gt;, &lt;strong&gt;SanteDB dCDR&lt;/strong&gt;.&lt;/p&gt;</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI (Group)" isGroup="True" isDocumented="True">&lt;p&gt;SanteDB Business Intelligence Services (reporting, querying, measure generation, aggregation, etc.) - for more information please consult the &lt;a href="https://help.santesuite.org/developers/applets/business-intelligence-bi-assets" target="_blank"&gt;Business Intelligence Assets&lt;/a&gt; documentation&lt;/p&gt;</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Components" isDocumented="True">SanteDB BI Components which can be placed on a SanteDB BI report rendering</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Components.Base" isDocumented="True">Base components (repeat, switch/when, etc.)</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Components.Chart" isDocumented="True">SanteDB BI Charting (graph, pie charts, historgrams, etc.) controls</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Components.Data" isDocumented="True">SanteDB Data Set Report Components (data table)</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Exceptions" isDocumented="True">Common exceptions thrown by the Business Intelligence Services</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Model" isDocumented="True">SanteDB BI model definition for BI assets found in an applet file.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Rendering" isDocumented="True">Utilities and controls for rendering reports and views</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Services" isDocumented="True">Core SanteDB BI Services (exposing BI functions to other parts of the SanteDB stack)</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BI.Services.Impl" isDocumented="True">Default implementations for the SanteDB BI services</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BusinessRules (Group)" isGroup="True" isDocumented="True">&lt;p&gt;SanteDB Business JavaScript Rules Engine - These classes provide the JavaScript to .NET bridge which allows &lt;a href="https://help.santesuite.org/developers/applets/business-rules" target="_blank"&gt;SanteDB Business Rules&lt;/a&gt; in JavaScript to be executed on the iCDR/dCDR&lt;/p&gt;</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.BusinessRules.JavaScript.JNI" isDocumented="True">JavaScript to native .NET interface bridge</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Cdss (Group)" isGroup="True" isDocumented="True">&lt;p&gt;SanteDB Clinical Decision Support XML services - Exposes the &lt;a href="https://help.santesuite.org/developers/applets/cdss-protocols" target="_blank"&gt;Clinical Decision Support&lt;/a&gt; engine, allowing implementers to specify CDSS rules in XML&lt;/p&gt;</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Cdss.Xml.Model" isDocumented="True">Model Classes for SanteDB CDSS</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Cdss.Xml.Model.XmlLinq" isDocumented="True">Serialization utilities which allow full LINQ expressions to be serialized as XML</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core (Group)" isGroup="True" isDocumented="True">SanteDB Core API Services</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Applets" isDocumented="True">SanteDB Core Applets Functionality Provider</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Applets.Model" isDocumented="True">Applet Manifest schema</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Applets.Services" isDocumented="True">Core service providers related to applets</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Applets.Services.Impl" isDocumented="True">Default implementations of applet services</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Applets.ViewModel" isDocumented="True">View Model XML Utilities</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Applets.ViewModel.Description" isDocumented="True">View Model Schema Description</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Attributes" isDocumented="True">Attributes used by the core</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Auditing" isDocumented="True">Core Auditing Content</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.BusinessRules" isDocumented="True">Core Business Rules Engine Functionality (Independent of JavaScript or implementation)</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Configuration" isDocumented="True">Core configuration feature - defining configuration section schema.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Configuration.Data" isDocumented="True">Configuration classes related to database functions.</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Data" isDocumented="True">Core Data Functions in SanteDB</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Data.Quality" isDocumented="True">Data Quality Validation Triggers</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Diagnostics" isDocumented="True">Core diagnostics infrastructure - (for tracing, probes and logging)</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Diagnostics.Performance" isDocumented="True">Perfromance Diagnostics Probes</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Exceptions" isDocumented="True">Key exceptions thrown by the SanteDB Service</NamespaceSummaryItem>
+      <NamespaceSummaryItem name="SanteDB.Core.Http" isDocumented="True">HTTP Extension classes</NamespaceSummaryItem>
+    </NamespaceSummaries>
+  </PropertyGroup>
+  <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
+			 the build.  The others are optional common platform types that may appear. -->
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x64' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|Win32' ">
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|Win32' ">
+  </PropertyGroup>
+  <!-- Import the common build targets during NuGet restore because before the packages are being installed, $(SHFBROOT) is not set yet -->
+  <Import Project="$(MSBuildToolsPath)\Microsoft.Common.targets" Condition="'$(MSBuildRestoreSessionId)' != ''" />
+  <!-- Import the SHFB build targets during build -->
+  <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" Condition="'$(MSBuildRestoreSessionId)' == ''" />
+  <!-- The pre-build and post-build event properties must appear *after* the targets file import in order to be
+			 evaluated correctly. -->
+  <PropertyGroup>
+    <PreBuildEvent>
+    </PreBuildEvent>
+    <PostBuildEvent>
+    </PostBuildEvent>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+  <ItemGroup>
+    <Image Include="icon.png">
+      <ImageId>icon</ImageId>
+      <AlternateText>icon</AlternateText>
+    </Image>
+  </ItemGroup>
+</Project>
