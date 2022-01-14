@@ -19,6 +19,7 @@ set netstandardopt=
 set netopt=
 set keepbuild=
 set addlcerts=
+set pubassets=
 
 for %%P in (%*) do (
 	
@@ -42,6 +43,10 @@ for %%P in (%*) do (
 	)
 	if [%%P] == [keepbuild] (
 		set keepbuild=1
+	)
+	if [%%P] == [pubassets] (
+		set /p pubassets=Enter publish location for help:
+		set /p pubassetsuser=Enter user to publish for help:
 	)
 )
 
@@ -230,6 +235,16 @@ echo Building WWW FROM %cd%
 call :SUB_DO_BUILD_WWW
 popd 
 
+rem Publishing
+if [%pubassets%]==[] (
+	echo Won't Publish Assets
+) else (
+	pushd %output% 
+	pushd ..
+	scp -r %version% %pubassetsuser%@%pubassets%:/var/www/html/santesuite/org/prod/assets/uploads/santedb/community/fresh/
+	popd
+	popd
+)
 goto :end
 
 
@@ -530,6 +545,19 @@ echo Building dCDR APIs
 pushd santedb-dc-core
 call :SUB_NETSTANDARD_BUILD "SanteDB.DisconnectedClient.i18n" "SanteDB.DisconnectedClient.Core" "SanteDB.DisconnectedClient.Core.SQLite" "SanteDB.DisconnectedClient.Ags" "SanteDB.DisconnectedClient.UI"
 popd
+
+if [%pubassets%] == [] (
+	echo Not Publishing Help!
+) else (
+	pushd Help
+	dotnet build santedb.shfbproj  --configuration %configuration% /p:VersionNumber=%version%
+	if exist "output\index.html" (
+		pushd output
+		scp -r * %pubassetsuser%@%pubassets%:/var/www/html/santesuite/org/prod/assets/doc/net
+		popd
+	)
+	popd
+)
 
 popd
 

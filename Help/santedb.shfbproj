@@ -74,14 +74,12 @@
 <DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.UI\SanteDB.DisconnectedClient.UI.csproj" />
 <DocumentationSource sourceFile="..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj" />
 <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.AMI\SanteDB.Core.Model.AMI.csproj" />
-<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.RISI\SanteDB.Core.Model.RISI.csproj" />
 <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.ViewModelSerializers\SanteDB.Core.Model.ViewModelSerializers.csproj" />
 <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.AMI\SanteDB.Rest.AMI.csproj" />
 <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
 <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.HDSI\SanteDB.Rest.HDSI.csproj" />
 <DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.AMI.Client\SanteDB.Messaging.AMI.Client.csproj" />
-<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj" />
-<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.RISI.Client\SanteDB.Messaging.RISI.Client.csproj" /></DocumentationSources>
+<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj" /></DocumentationSources>
     <WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
     <RootNamespaceTitle>SanteDB CDR .NET API</RootNamespaceTitle>
     <ProjectSummary>&amp;lt%3bp&amp;gt%3bSanteDB Clinical Data Repository %28CDR%29 .NET API Documentation. &amp;lt%3b/p&amp;gt%3b
