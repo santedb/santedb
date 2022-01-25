@@ -312,6 +312,9 @@ if not exist "bin\Release\dist" (
 
 copy dist\santempi.sln.pak bin\Release\applets
 xcopy ..\santedb-server\bin\Release\*.* bin\Release /S /Y
+copy %output%\applets\sln\santedb.core.sln.pak bin\release\applets /y
+copy %output%\applets\sln\santedb.admin.sln.pak bin\release\applets /y
+copy %output%\applets\sln\santempi.sln.pak bin\release\applets /y
 
 call :SUB_BUILD_TARBALL santempi bin\Release
 
