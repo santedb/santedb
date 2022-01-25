@@ -241,7 +241,7 @@ if [%pubassets%]==[] (
 ) else (
 	pushd %output% 
 	pushd ..
-	scp -r %version% %pubassetsuser%@%pubassets%:/var/www/html/santesuite/org/prod/assets/uploads/santedb/community/fresh/
+	scp -r %version% %pubassetsuser%@%pubassets%:/var/www/html/santesuite/org/prod/assets/uploads/santedb/community/releases/
 	popd
 	popd
 )
@@ -300,7 +300,8 @@ if not exist "dist" (
 	mkdir dist
 )
 
-
+mkdir bin\Release\matching
+copy SanteMPI\match\DefaultPatientMatching.xml bin\Release\matching
 copy %output%\applets\sln\santempi.sln.pak .\dist\
 
 call :SUB_BUILD_INSTALLER install\santempi-install.iss

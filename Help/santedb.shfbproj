@@ -18,7 +18,7 @@
     <OutputPath>output\</OutputPath>
     <HtmlHelpName>santedb-help</HtmlHelpName>
     <Language>en-US</Language>
-    <HelpFileFormat>HtmlHelp1, Website</HelpFileFormat>
+    <HelpFileFormat>MSHelpViewer, Website</HelpFileFormat>
     <SyntaxFilters>Standard</SyntaxFilters>
     <PresentationStyle>VS2013</PresentationStyle>
     <CleanIntermediates>True</CleanIntermediates>
@@ -56,30 +56,31 @@
     <MSHelpViewerSdkLinkType>Msdn</MSHelpViewerSdkLinkType>
     <DocumentationSources>
       <DocumentationSource sourceFile="..\restsrvr\RestSrvr\RestSrvr.csproj" />
-<DocumentationSource sourceFile="..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj" />
-<DocumentationSource sourceFile="..\santedb-applets\SanteDB.Core.Applets\SanteDB.Core.Applets.csproj" />
-<DocumentationSource sourceFile="..\santedb-bis\SanteDB.BI\SanteDB.BI.csproj" />
-<DocumentationSource sourceFile="..\santedb-bre-js\SanteDB.BusinessRules.JavaScript\SanteDB.BusinessRules.JavaScript.csproj" />
-<DocumentationSource sourceFile="..\santedb-cdss\SanteDB.Cdss.Xml\SanteDB.Cdss.Xml.csproj" />
-<DocumentationSource sourceFile="..\santedb-docker\SanteDB.Docker.Core\SanteDB.Docker.Core.csproj" />
-<DocumentationSource sourceFile="..\santedb-fhir\SanteDB.Messaging.FHIR\SanteDB.Messaging.FHIR.csproj" />
-<DocumentationSource sourceFile="..\santedb-hl7\SanteDB.Messaging.HL7\SanteDB.Messaging.HL7.csproj" />
-<DocumentationSource sourceFile="..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj" />
-<DocumentationSource sourceFile="..\santedb-orm\SanteDB.OrmLite\SanteDB.OrmLite.csproj" />
-<DocumentationSource sourceFile="..\santedb-cache-memory\SanteDB.Caching.Memory\SanteDB.Caching.Memory.csproj" />
-<DocumentationSource sourceFile="..\santedb-cache-redis\SanteDB.Caching.Redis\SanteDB.Caching.Redis.csproj" />
-<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Ags\SanteDB.DisconnectedClient.Ags.csproj" />
-<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Core.SQLite\SanteDB.DisconnectedClient.SQLite.csproj" />
-<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Core\SanteDB.DisconnectedClient.Core.csproj" />
-<DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.UI\SanteDB.DisconnectedClient.UI.csproj" />
-<DocumentationSource sourceFile="..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj" />
-<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.AMI\SanteDB.Core.Model.AMI.csproj" />
-<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.ViewModelSerializers\SanteDB.Core.Model.ViewModelSerializers.csproj" />
-<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.AMI\SanteDB.Rest.AMI.csproj" />
-<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
-<DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.HDSI\SanteDB.Rest.HDSI.csproj" />
-<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.AMI.Client\SanteDB.Messaging.AMI.Client.csproj" />
-<DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj" /></DocumentationSources>
+      <DocumentationSource sourceFile="..\santedb-api\SanteDB.Core.Api\SanteDB.Core.Api.csproj" />
+      <DocumentationSource sourceFile="..\santedb-applets\SanteDB.Core.Applets\SanteDB.Core.Applets.csproj" />
+      <DocumentationSource sourceFile="..\santedb-bis\SanteDB.BI\SanteDB.BI.csproj" />
+      <DocumentationSource sourceFile="..\santedb-bre-js\SanteDB.BusinessRules.JavaScript\SanteDB.BusinessRules.JavaScript.csproj" />
+      <DocumentationSource sourceFile="..\santedb-cdss\SanteDB.Cdss.Xml\SanteDB.Cdss.Xml.csproj" />
+      <DocumentationSource sourceFile="..\santedb-docker\SanteDB.Docker.Core\SanteDB.Docker.Core.csproj" />
+      <DocumentationSource sourceFile="..\santedb-fhir\SanteDB.Messaging.FHIR\SanteDB.Messaging.FHIR.csproj" />
+      <DocumentationSource sourceFile="..\santedb-hl7\SanteDB.Messaging.HL7\SanteDB.Messaging.HL7.csproj" />
+      <DocumentationSource sourceFile="..\santedb-model\SanteDB.Core.Model\SanteDB.Core.Model.csproj" />
+      <DocumentationSource sourceFile="..\santedb-orm\SanteDB.OrmLite\SanteDB.OrmLite.csproj" />
+      <DocumentationSource sourceFile="..\santedb-cache-memory\SanteDB.Caching.Memory\SanteDB.Caching.Memory.csproj" />
+      <DocumentationSource sourceFile="..\santedb-cache-redis\SanteDB.Caching.Redis\SanteDB.Caching.Redis.csproj" />
+      <DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Ags\SanteDB.DisconnectedClient.Ags.csproj" />
+      <DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Core.SQLite\SanteDB.DisconnectedClient.SQLite.csproj" />
+      <DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.Core\SanteDB.DisconnectedClient.Core.csproj" />
+      <DocumentationSource sourceFile="..\santedb-dc-core\SanteDB.DisconnectedClient.UI\SanteDB.DisconnectedClient.UI.csproj" />
+      <DocumentationSource sourceFile="..\santedb-match\SanteDB.Matcher\SanteDB.Matcher.csproj" />
+      <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.AMI\SanteDB.Core.Model.AMI.csproj" />
+      <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Core.Model.ViewModelSerializers\SanteDB.Core.Model.ViewModelSerializers.csproj" />
+      <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.AMI\SanteDB.Rest.AMI.csproj" />
+      <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.Common\SanteDB.Rest.Common.csproj" />
+      <DocumentationSource sourceFile="..\santedb-restsvc\SanteDB.Rest.HDSI\SanteDB.Rest.HDSI.csproj" />
+      <DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.AMI.Client\SanteDB.Messaging.AMI.Client.csproj" />
+      <DocumentationSource sourceFile="..\santedb-client\SanteDB.Messaging.HDSI.Client\SanteDB.Messaging.HDSI.Client.csproj" />
+    </DocumentationSources>
     <WarnOnMissingSourceContext>False</WarnOnMissingSourceContext>
     <RootNamespaceTitle>SanteDB CDR .NET API</RootNamespaceTitle>
     <ProjectSummary>&amp;lt%3bp&amp;gt%3bSanteDB Clinical Data Repository %28CDR%29 .NET API Documentation. &amp;lt%3b/p&amp;gt%3b
