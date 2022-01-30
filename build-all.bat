@@ -301,7 +301,7 @@ if not exist "dist" (
 )
 
 mkdir bin\Release\matching
-copy SanteMPI\match\DefaultPatientMatching.xml bin\Release\matching
+copy SanteMPI\match\*.xml bin\Release\matching
 copy %output%\applets\sln\santempi.sln.pak .\dist\
 
 call :SUB_BUILD_INSTALLER install\santempi-install.iss
