@@ -3,6 +3,17 @@ First of all, thank you for taking the time to contribute to this project. We've
 
 ## Getting started
 
+### Branches and Tags
+
+SanteDB projects use the following conventions for branches and tags:
+
+* `master` - This contains the contents of the last release/tag created by the build processes
+* `develop` - This contains the latest development branch code of SanteDB (current 2.1.x)
+* `version/??` - Branches starting with a `version/` tag are the maintenance branches for any official version of SanteDB (even numbered minors)
+* `feature/??` - Branches starting with `feature/` indicate a new feature which is being worked on. These branches usually sync with `develop/`. Once the feature is complete, the `feature/??` branch is merged to `develop/`
+* `issue/???` - Issues or fixes to the project which address a bug 
+* `vx.x.x` - Tags indicating the semantic version of the project
+
 ### Check out the roadmap
 
 We have some functionalities in mind and we have issued them and there is a *milestone* label available on the issue. If there is a bug or a feature that is not listed in the **issues** page or there is no one assigned to the issue, feel free to fix/add it! Although it's better to discuss it in the issue or create a new issue for it so there is no confilcting code, and we maintain a cohesive architecture.
