@@ -26,8 +26,8 @@ for %%P in (%*) do (
 	if [%%P] == [nosign] (
 		set nosign=1
 	)
-	if [%%P] == [notag] (
-		set notag=1
+	if [%%P] == [tag] (
+		set tag=1
 	)
 	if [%%P] == [sign] (
 		set /p signkey=Enter the hash for your signing key:
@@ -163,7 +163,7 @@ set target=NugetRelease
 if [%configuration%] == [Debug] (
 	set target=NugetStaging
 	set nosign=1
-	set notag=1
+	set tag=1
 	set nodocker=1
 	set netstandardopt=--include-symbols
 	set netopt=-symbols
@@ -188,7 +188,7 @@ if [%nosign%] == [1] (
 if ([%nodocker%] == [1] (
 	echo Docker = DISABLED
 )
-if [%notag%] == [1] (
+if [%tag%] == [] (
 	echo Tagging = DISABLED
 ) else (
 	echo Tagging = ENABLED
@@ -209,7 +209,7 @@ pause
 echo Will build release of SanteDB (entire Suite)
 
 rem ------------------------------ CREATE BUILD DIRECTORY 
-set "buildPath=%tmp%\sdb~%RANDOM%"
+set "buildPath=%tmp%\santedb\sdb~%RANDOM%"
 echo Will build in %buildPath%
 if not exist "%buildPath%" (
 	mkdir %buildPath%
@@ -229,6 +229,8 @@ echo Building SDK FROM %cd%
 call :SUB_DO_BUILD_SDK
 echo Building Server FROM %cd%
 call :SUB_DO_BUILD_SERVER
+echo Building SanteGuard FROM %cd%
+call :SUB_DO_BUILD_SANTEGUARD
 echo Building MPI FROM %cd%
 call :SUB_DO_BUILD_SANTEMPI
 echo Building WWW FROM %cd%
@@ -291,7 +293,7 @@ call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
 	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" 
 ) else (
-	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% 
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% --publish
 )
 
 call :SUB_NETBUILD santempi.sln
@@ -326,6 +328,55 @@ call :SUB_BUILD_DOCKER santedb-mpi
 popd
 exit /B
 
+
+rem ----------------------------- START SANTEGUARD SERVER BUILD
+:SUB_DO_BUILD_SANTEGUARD
+
+echo Cloning SanteGuard project
+git clone https://github.com/santedb/santeguard
+pushd santeguard
+git checkout %branchBuild%
+
+git submodule init
+git submodule update --remote
+
+echo %version% > release-version
+
+call :SUB_BUILD_APPLET applet org.santedb.sg
+if [%nosign%] == [1] (
+	%pakman% --compose --version=%version% --source=santeguard.sln.xml -o "%output%\applets\sln\santeguard.sln.pak" 
+) else (
+	%pakman% --compose --version=%version% --source=santeguard.sln.xml -o "%output%\applets\sln\santeguard.sln.pak"  --embedcert --sign --certHash=%commkey% --publish
+)
+
+call :SUB_NETBUILD santeguard.sln
+
+if not exist "dist" (
+	mkdir dist
+)
+
+copy %output%\applets\sln\santeguard.sln.pak .\dist\
+
+rem call :SUB_BUILD_INSTALLER install\santempi-install.iss
+
+if not exist "bin\Release\dist" (
+	mkdir bin\Release\dist
+)
+
+xcopy ..\santedb-server\bin\Release\*.* bin\Release /S /Y
+copy %output%\applets\sln\santedb.core.sln.pak bin\release\applets /y
+copy %output%\applets\sln\santedb.admin.sln.pak bin\release\applets /y
+copy %output%\applets\sln\santeguard.sln.pak bin\release\applets /y
+
+call :SUB_BUILD_TARBALL santeguard bin\Release
+
+
+rem We re-sign for docker since mono doesn't have all authenticode certs
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
+call :SUB_BUILD_DOCKER santeguard
+
+popd
+exit /B
 
 rem ----------------------------- START SANTEDB SERVER BUILD
 :SUB_DO_BUILD_SERVER
@@ -593,8 +644,8 @@ if [%nosign%] == [1] (
 	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" 
 	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" 
 ) else (
-	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert
-	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert --publish
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert --publish
 )
 
 call :SUB_GIT_TAG
@@ -699,7 +750,7 @@ if exist "manifest.xml" (
 	if [%nosign%] == [1] (
 		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
 	) else ( 
-		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install 
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install  --publish
 	)
 )
 popd
@@ -911,7 +962,7 @@ exit /B
 
 :SUB_GIT_TAG
 
-if [%notag%] == [] (
+if [%tag%] == [1] (
 	if [%branchBuild%] == [master] (
 		git tag %version%
 		git push --tags
