@@ -59,14 +59,19 @@ if [%zip%]==[] (
 	)
 )
 if [%msbuild%] == [] (
-	if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
-			set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin"
-	) else ( 
-		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe" (
-				set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin"
-		) else (
-			echo Unable to locate VS 2019 build tools, set msbuild environment variable manually
-			set shouldexit=1
+	if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe" (
+	        	echo will use VS 2022 Pro build tools
+        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe"
+	) else (
+		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
+				set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin"
+		) else ( 
+			if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe" (
+					set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin"
+			) else (
+				echo Unable to locate VS 2019 build tools, set msbuild environment variable manually
+				set shouldexit=1
+			)
 		)
 	)
 )
@@ -94,11 +99,15 @@ if [%inno%] == [] (
 )
 
 if [%signtool%] == [] (
-	if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe" (
-		set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
+	if exist "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" (
+			set signtool="C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe"
 	) else (
-		echo Can't find signtool.exe set signtool environment variable manually
-		set shouldexit=1
+		if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe" (
+			set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
+		) else (
+			echo Can't find signtool.exe set signtool environment variable manually
+			set shouldexit=1
+		)
 	)
 )
 
@@ -546,6 +555,17 @@ pushd santedb-fhir
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.FHIR"
 popd
 
+
+echo Build ORM Module
+pushd santedb-orm
+call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
+popd
+
+echo Build MDM Module
+pushd santedb-mdm
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.MDM"
+popd
+
 echo Building HL7 Module
 pushd santedb-hl7
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.HL7"
@@ -559,16 +579,6 @@ popd
 echo Building BIS Module
 pushd santedb-bis
 call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
-popd
-
-echo Build ORM Module
-pushd santedb-orm
-call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
-popd
-
-echo Build MDM Module
-pushd santedb-mdm
-call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.MDM"
 popd
 
 echo Build SanteDB CDSS Module
