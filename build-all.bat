@@ -61,7 +61,7 @@ if [%zip%]==[] (
 if [%msbuild%] == [] (
 	if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe" (
 	        	echo will use VS 2022 Pro build tools
-        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe"
+        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin"
 	) else (
 		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
 				set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin"
@@ -555,6 +555,10 @@ pushd santedb-fhir
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.FHIR"
 popd
 
+echo Building BIS Module
+pushd santedb-bis
+call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
+popd
 
 echo Build ORM Module
 pushd santedb-orm
@@ -574,11 +578,6 @@ popd
 echo Building OpenAPI Module
 pushd santedb-openapi
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.OpenAPI"
-popd
-
-echo Building BIS Module
-pushd santedb-bis
-call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
 popd
 
 echo Build SanteDB CDSS Module
