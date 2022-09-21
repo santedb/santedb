@@ -20,14 +20,78 @@ set netopt=
 set keepbuild=
 set addlcerts=
 set pubassets=
+set partial_build=
+set build_icdr=
+set build_sdk=
+set build_dcg=
+set build_core=
+set build_mpi=
+set build_applets=
+set build_www=
 
 for %%P in (%*) do (
 	
+	if [%%P] == [help] (
+		echo Use: build-all.bat VERSION BRANCH [options] [projects]
+		echo Example: build-all.bat 2.6 version/2.0
+		echo Build Options:
+		echo    nosign    -	Don't append digital signatures to the outputs
+		echo    notag     -	Don't create a version tag in GIT
+		echo    sign      -	Sign with a custom key
+		echo    pubnuget  -	Publish packages to nuget
+		echo    debug     -	Build in DEBUG mode
+		echo    nodocker  -	Do not build the docker containers
+		echo    keepbuild -	Keep the temporary build directory
+		echo Projects:
+		echo    icdr      - 	Build iCDR Server
+		echo    dcg	      -	Build Disconnected Gateway
+		echo    www       -	Build the WWW server
+		echo    core      -	Build the core APIs
+		echo    sdk	      -	Build the SDK
+		echo    applets   -	Build applets
+		echo    mpi	      -	Build SanteMPI
+		
+		goto :end
+	)
 	if [%%P] == [nosign] (
 		set nosign=1
 	)
-	if [%%P] == [tag] (
-		set tag=1
+	if [%%P] == [icdr] (
+		set partial_build=1
+		set build_core=1
+		set build_icdr=1
+	)
+	if [%%P] == [dcg] (
+		set partial_build=1
+		set build_core=1
+		set build_dcg=1
+	)
+	if [%%P] == [www] (
+		set build_core=1
+		set partial_build=1
+		set build_www=1
+	)
+	if [%%P] == [core] (
+		set partial_build=1
+		set build_core=1
+	)
+	if [%%P] == [sdk] (
+		set partial_build=1
+		set build_core=1
+		set build_sdk=1
+	)
+	if [%%P] == [applets] (
+		set partial_build=1
+		set build_applets=1
+	)
+	if [%%P] == [mpi] (
+		set partial_build=1
+		set build_core=1
+		set build_icdr=1
+		set build_mpi=1
+	)
+	if [%%P] == [notag] (
+		set notag=1
 	)
 	if [%%P] == [sign] (
 		set /p signkey=Enter the hash for your signing key:
@@ -50,6 +114,16 @@ for %%P in (%*) do (
 	)
 )
 
+if [%partial_build%] == [] (
+	set build_icdr=1
+	set build_dcg=1
+	set build_www=1
+	set build_core=1
+	set build_sdk=1
+	set build_mpi=1
+	set build_applets=1
+)
+
 if [%zip%]==[] (
 	if exist "C:\program files\7-zip\7z.exe" (
 		set zip="C:\program files\7-zip\7z.exe"
@@ -59,19 +133,14 @@ if [%zip%]==[] (
 	)
 )
 if [%msbuild%] == [] (
-	if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe" (
-	        	echo will use VS 2022 Pro build tools
-        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin"
-	) else (
-		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
-				set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin"
-		) else ( 
-			if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe" (
-					set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin"
-			) else (
-				echo Unable to locate VS 2019 build tools, set msbuild environment variable manually
-				set shouldexit=1
-			)
+	if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
+			set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin"
+	) else ( 
+		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin\MSBuild.exe" (
+				set msbuild="c:\Program Files (x86)\Microsoft Visual Studio\2019\Professional\MSBuild\Current\Bin"
+		) else (
+			echo Unable to locate VS 2019 build tools, set msbuild environment variable manually
+			set shouldexit=1
 		)
 	)
 )
@@ -99,15 +168,11 @@ if [%inno%] == [] (
 )
 
 if [%signtool%] == [] (
-	if exist "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" (
-			set signtool="C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe"
+	if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe" (
+		set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
 	) else (
-		if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe" (
-			set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
-		) else (
-			echo Can't find signtool.exe set signtool environment variable manually
-			set shouldexit=1
-		)
+		echo Can't find signtool.exe set signtool environment variable manually
+		set shouldexit=1
 	)
 )
 
@@ -172,7 +237,7 @@ set target=NugetRelease
 if [%configuration%] == [Debug] (
 	set target=NugetStaging
 	set nosign=1
-	set tag=1
+	set notag=1
 	set nodocker=1
 	set netstandardopt=--include-symbols
 	set netopt=-symbols
@@ -197,7 +262,7 @@ if [%nosign%] == [1] (
 if ([%nodocker%] == [1] (
 	echo Docker = DISABLED
 )
-if [%tag%] == [] (
+if [%notag%] == [1] (
 	echo Tagging = DISABLED
 ) else (
 	echo Tagging = ENABLED
@@ -213,12 +278,35 @@ echo 7-zip = %zip%
 echo ----------------------
 echo ENSURE NUGET HAS A LOCAL PACKAGE REPOSITORY %localappdata%\%target% BEFORE YOU CONTINUE
 echo ----------------------
+echo ===== PROJECTS TO BUILD ======
+if [%build_core%] == [1] (
+	echo * CORE APIs
+)
+if [%build_sdk%] == [1] (
+	echo * SDK
+)	
+if [%build_icdr%] == [1] (
+	echo * iCDR
+)
+if [%build_mpi%] == [1] (
+	echo * SanteMPI
+)
+if [%build_dcg%] == [1] (
+	echo * Disconnected Gateway
+)
+if [%build_www%] == [1] (
+	echo * WWW Service
+)
+if [%build_applets%] == [1] (
+	echo * Applets
+)
+
 echo Confirm Build Settings (CTRL+C to cancel)
 pause
 echo Will build release of SanteDB (entire Suite)
 
 rem ------------------------------ CREATE BUILD DIRECTORY 
-set "buildPath=%tmp%\santedb\sdb~%RANDOM%"
+set "buildPath=%tmp%\sdb~%RANDOM%"
 echo Will build in %buildPath%
 if not exist "%buildPath%" (
 	mkdir %buildPath%
@@ -230,20 +318,30 @@ rmdir /s /q "%localappdata%\%target%"
 echo Creating SanteDB NUGET Release Directory at %localappdata%\%target%
 mkdir "%localappdata%\%target%"
 
-echo Building Core FROM %cd%
-call :SUB_DO_BUILD_CORE
-echo Building Applets FROM %cd%
-call :SUB_DO_BUILD_APPLETS
-echo Building SDK FROM %cd%
-call :SUB_DO_BUILD_SDK
-echo Building Server FROM %cd%
-call :SUB_DO_BUILD_SERVER
-echo Building SanteGuard FROM %cd%
-call :SUB_DO_BUILD_SANTEGUARD
-echo Building MPI FROM %cd%
-call :SUB_DO_BUILD_SANTEMPI
-echo Building WWW FROM %cd%
-call :SUB_DO_BUILD_WWW
+if [%build_core%] == [1] (
+	echo Building Core FROM %cd%
+	call :SUB_DO_BUILD_CORE
+)
+if [%build_applets%] == [1] (
+	echo Building Applets FROM %cd%
+	call :SUB_DO_BUILD_APPLETS
+)
+if [%build_sdk%] == [1] (
+	echo Building SDK FROM %cd%
+	call :SUB_DO_BUILD_SDK
+)
+if [%build_icdr%] == [1] (
+	echo Building Server FROM %cd%
+	call :SUB_DO_BUILD_SERVER
+)
+if [%build_mpi%] == [1] (
+	echo Building MPI FROM %cd%
+	call :SUB_DO_BUILD_SANTEMPI
+)
+if [%build_www%] == [1] (
+	echo Building WWW FROM %cd%
+	call :SUB_DO_BUILD_WWW
+)
 popd 
 
 rem Publishing
@@ -302,7 +400,7 @@ call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
 	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" 
 ) else (
-	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% --publish
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% 
 )
 
 call :SUB_NETBUILD santempi.sln
@@ -312,7 +410,7 @@ if not exist "dist" (
 )
 
 mkdir bin\Release\matching
-copy SanteMPI\match\*.xml bin\Release\matching
+copy SanteMPI\match\DefaultPatientMatching.xml bin\Release\matching
 copy %output%\applets\sln\santempi.sln.pak .\dist\
 
 call :SUB_BUILD_INSTALLER install\santempi-install.iss
@@ -337,55 +435,6 @@ call :SUB_BUILD_DOCKER santedb-mpi
 popd
 exit /B
 
-
-rem ----------------------------- START SANTEGUARD SERVER BUILD
-:SUB_DO_BUILD_SANTEGUARD
-
-echo Cloning SanteGuard project
-git clone https://github.com/santedb/santeguard
-pushd santeguard
-git checkout %branchBuild%
-
-git submodule init
-git submodule update --remote
-
-echo %version% > release-version
-
-call :SUB_BUILD_APPLET applet org.santedb.sg
-if [%nosign%] == [1] (
-	%pakman% --compose --version=%version% --source=santeguard.sln.xml -o "%output%\applets\sln\santeguard.sln.pak" 
-) else (
-	%pakman% --compose --version=%version% --source=santeguard.sln.xml -o "%output%\applets\sln\santeguard.sln.pak"  --embedcert --sign --certHash=%commkey% --publish
-)
-
-call :SUB_NETBUILD santeguard.sln
-
-if not exist "dist" (
-	mkdir dist
-)
-
-copy %output%\applets\sln\santeguard.sln.pak .\dist\
-
-rem call :SUB_BUILD_INSTALLER install\santempi-install.iss
-
-if not exist "bin\Release\dist" (
-	mkdir bin\Release\dist
-)
-
-xcopy ..\santedb-server\bin\Release\*.* bin\Release /S /Y
-copy %output%\applets\sln\santedb.core.sln.pak bin\release\applets /y
-copy %output%\applets\sln\santedb.admin.sln.pak bin\release\applets /y
-copy %output%\applets\sln\santeguard.sln.pak bin\release\applets /y
-
-call :SUB_BUILD_TARBALL santeguard bin\Release
-
-
-rem We re-sign for docker since mono doesn't have all authenticode certs
-call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
-call :SUB_BUILD_DOCKER santeguard
-
-popd
-exit /B
 
 rem ----------------------------- START SANTEDB SERVER BUILD
 :SUB_DO_BUILD_SERVER
@@ -520,6 +569,12 @@ pushd restsrvr
 call :SUB_NETSTANDARD_BUILD RestSrvr
 popd 
 
+
+echo Building SanteDB i18n
+pushd santedb-i18n
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.i18n"
+popd 
+
 echo Building SanteDB Model
 pushd santedb-model
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model"
@@ -555,6 +610,16 @@ pushd santedb-fhir
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.FHIR"
 popd
 
+echo Building HL7 Module
+pushd santedb-hl7
+call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.HL7"
+popd
+
+echo Building OpenAPI Module
+pushd santedb-openapi
+call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.OpenAPI"
+popd
+
 echo Building BIS Module
 pushd santedb-bis
 call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
@@ -568,16 +633,6 @@ popd
 echo Build MDM Module
 pushd santedb-mdm
 call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.MDM"
-popd
-
-echo Building HL7 Module
-pushd santedb-hl7
-call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.HL7"
-popd
-
-echo Building OpenAPI Module
-pushd santedb-openapi
-call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.OpenAPI"
 popd
 
 echo Build SanteDB CDSS Module
@@ -653,8 +708,8 @@ if [%nosign%] == [1] (
 	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" 
 	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" 
 ) else (
-	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert --publish
-	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert --publish
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert
 )
 
 call :SUB_GIT_TAG
@@ -759,7 +814,7 @@ if exist "manifest.xml" (
 	if [%nosign%] == [1] (
 		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
 	) else ( 
-		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install  --publish
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install 
 	)
 )
 popd
@@ -971,7 +1026,7 @@ exit /B
 
 :SUB_GIT_TAG
 
-if [%tag%] == [1] (
+if [%notag%] == [] (
 	if [%branchBuild%] == [master] (
 		git tag %version%
 		git push --tags
