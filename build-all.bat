@@ -582,7 +582,7 @@ popd
 
 echo Building SanteDB API
 pushd santedb-api
-call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Api"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Api" "SanteDB.Core.TestFramework"
 popd 
 
 echo Building SanteDB Docker Core
@@ -629,6 +629,10 @@ echo Build ORM Module
 pushd santedb-orm
 call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
 popd
+
+echo Building Data Persistence Modules
+pushd santedb-data
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO"
 
 echo Build MDM Module
 pushd santedb-mdm
