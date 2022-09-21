@@ -633,6 +633,7 @@ popd
 echo Building Data Persistence Modules
 pushd santedb-data
 call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO"
+popd
 
 echo Build MDM Module
 pushd santedb-mdm
