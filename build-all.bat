@@ -604,7 +604,7 @@ popd
 
 echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
-call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI","SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI"
 popd 
 
 echo Building JavaScript BRE
