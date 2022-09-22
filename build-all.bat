@@ -28,6 +28,7 @@ set build_core=
 set build_mpi=
 set build_applets=
 set build_www=
+set build_dcdr=
 
 for %%P in (%*) do (
 	
@@ -50,7 +51,7 @@ for %%P in (%*) do (
 		echo    sdk	      -	Build the SDK
 		echo    applets   -	Build applets
 		echo    mpi	      -	Build SanteMPI
-		
+		echo    dcdr      - Build dCDR APIs
 		goto :end
 	)
 	if [%%P] == [nosign] (
@@ -65,11 +66,13 @@ for %%P in (%*) do (
 		set partial_build=1
 		set build_core=1
 		set build_dcg=1
+		set build_dcdr=1
 	)
 	if [%%P] == [www] (
 		set build_core=1
 		set partial_build=1
 		set build_www=1
+		set build_dcdr=1
 	)
 	if [%%P] == [core] (
 		set partial_build=1
@@ -79,6 +82,7 @@ for %%P in (%*) do (
 		set partial_build=1
 		set build_core=1
 		set build_sdk=1
+		set build_dcdr=1
 	)
 	if [%%P] == [applets] (
 		set partial_build=1
@@ -89,6 +93,10 @@ for %%P in (%*) do (
 		set build_core=1
 		set build_icdr=1
 		set build_mpi=1
+	)
+	if [%%P] == [dcdr] (
+		set partial_build=1
+		set build_dcdr=1
 	)
 	if [%%P] == [notag] (
 		set notag=1
@@ -122,6 +130,8 @@ if [%partial_build%] == [] (
 	set build_sdk=1
 	set build_mpi=1
 	set build_applets=1
+	set build_dcdr=1
+	
 )
 
 if [%zip%]==[] (
@@ -306,6 +316,9 @@ if [%build_www%] == [1] (
 )
 if [%build_applets%] == [1] (
 	echo * Applets
+)
+if [%build_dcdr%] == [1] (
+	echo * dCDR
 )
 
 echo Confirm Build Settings (CTRL+C to cancel)
@@ -640,6 +653,7 @@ popd
 echo Building Data Persistence Modules
 pushd santedb-data
 call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO"
+popd
 
 echo Build MDM Module
 pushd santedb-mdm
@@ -671,10 +685,12 @@ pushd santedb-match
 call :SUB_NETSTANDARD_BUILD "SanteDB.Matcher"
 popd
 
-echo Building dCDR APIs
-pushd santedb-dc-core
-call :SUB_NETSTANDARD_BUILD "SanteDB.DisconnectedClient.i18n" "SanteDB.DisconnectedClient.Core" "SanteDB.DisconnectedClient.Core.SQLite" "SanteDB.DisconnectedClient.Ags" "SanteDB.DisconnectedClient.UI"
-popd
+if [%build_dcdr%] == [1] (
+	echo Building dCDR APIs
+	pushd santedb-dc-core
+	call :SUB_NETSTANDARD_BUILD "SanteDB.DisconnectedClient.i18n" "SanteDB.DisconnectedClient.Core" "SanteDB.DisconnectedClient.Core.SQLite" "SanteDB.DisconnectedClient.Ags" "SanteDB.DisconnectedClient.UI"
+	popd
+)
 
 if [%pubassets%] == [] (
 	echo Not Publishing Help!
