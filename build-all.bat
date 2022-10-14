@@ -145,7 +145,7 @@ if [%zip%]==[] (
 if [%msbuild%] == [] (
 	if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe" (
 	        	echo will use VS 2022 Pro build tools
-        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe"
+        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin"
 	) else (
 		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
 	        	echo will use VS 2019 Community build tools
@@ -185,8 +185,8 @@ if [%inno%] == [] (
 )
 
 if [%signtool%] == [] (
-	if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe" (
-		set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
+	if exist "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" (
+		set signtool="C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe"
 	) else (
 		echo Can't find signtool.exe set signtool environment variable manually
 		set shouldexit=1
@@ -617,7 +617,7 @@ popd
 
 echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
-call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW"
 popd 
 
 echo Building JavaScript BRE
@@ -652,7 +652,7 @@ popd
 
 echo Building Data Persistence Modules
 pushd santedb-data
-call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO" "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
 popd
 
 echo Build MDM Module
