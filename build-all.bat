@@ -221,8 +221,18 @@ if not exist "%third_party%\SqlCipher.dll" (
 	set shouldexit=1
 )
 
+if not exist "%third_party%\SpellFix.dll" (
+	echo Missing %third_party%\SpellFix.dll - Please compile Spellfix and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
+	set shouldexit=1
+)
+
 if not exist "%third_party%\netfx.exe" (
 	echo Missing %third_party%\netfx.exe - Please obtain .NET Redistributable and place in this location https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer
+	set shouldexit=1
+)
+
+if not exist "%third_party%\libcrypto-1_1-x64.dll" (
+	echo Missing %third_party%\libcrypto-1_1-x64.dll - Please obtain OpenSSL 1.x runtime 
 	set shouldexit=1
 )
 
@@ -231,8 +241,8 @@ if not exist "%third_party%\vc2010.exe" (
 	set shouldexit=1
 )
 
-if not exist "%third_party%\vcredist_x86.exe" (
-	echo Missing %third_party%\vcredist_x86.exe - Please obtain Visual C++ 2015/2017/2019 Common Redistributable and place at this location https://aka.ms/vs/16/release/vc_redist.x86.exe
+if not exist "%third_party%\vc_redist.x64.exe" (
+	echo Missing %third_party%\vc_redist.x64.exe - Please obtain Visual C++ 2015/2017/2019/2022 Common Redistributable and place at this location https://aka.ms/vs/16/release/vc_redist.x86.exe
 	set shouldexit=1
 )
 
@@ -478,7 +488,10 @@ for /D %%G in (.\*) do (
 )
 	
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
-copy %third_party%\vc2010.exe ".\installer\vc2010.exe"
+copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
+copy %third_party%\sqlcipher.dll ".\solution items\sqlcipher.dll"
+copy %third_party%\spellfix.dll ".\solution items\spellfix.dll"
+copy %third_party%\libcrypto-1_1-x64.dll ".\solution items\libcrypto-1_1-x64.dll"
 
 copy %output%\applets\sln\santedb.core.sln.pak SanteDB\Applets /y
 copy %output%\applets\sln\santedb.admin.sln.pak SanteDB\Applets /y
@@ -493,6 +506,8 @@ call :SUB_BUILD_INSTALLER installer\sdbac.iss
 echo Copying LINUX Install Script
 copy .\installer\install.sh bin\Release\install.sh
 copy %addlcerts% bin\Release\inter.cer
+copy .\santedb-tools\bin\release\net4.8\sdbac.exe bin\release\sdbac.exe
+copy .\santedb-tools\bin\release\net4.8\sdbac.exe.config bin\release\sdbac.exe.config
 call :SUB_BUILD_TARBALL santedb-server bin\Release
 
 
@@ -511,8 +526,8 @@ copy "%cd%\bin\release\SanteDB.Messaging.HDSI.Client.dll" "sdbac-tmp"
 copy "%cd%\bin\release\SanteDB.Rest.Common.dll" "sdbac-tmp"
 copy "%cd%\bin\release\SanteDB.Server.AdminConsole.Api.dll" "sdbac-tmp"
 copy "%cd%\bin\release\SanteDB.Server.Core.dll" "sdbac-tmp"
-copy "%cd%\bin\release\sdbac.exe" "sdbac-tmp"
-copy "%cd%\bin\release\sdbac.exe.config" "sdbac-tmp"
+copy "%cd%\santedb-tools\bin\Release\net4.8\sdbac.exe" "sdbac-tmp"
+copy "%cd%\santedb-tools\bin\Release\net4.8\sdbac.exe.config" "sdbac-tmp"
 copy "%cd%\bin\release\SharpCompress.dll" "sdbac-tmp"
 copy "%cd%\bin\release\System.Buffers.dll" "sdbac-tmp"
 copy "%cd%\bin\release\System.Collections.Concurrent.dll" "sdbac-tmp"
@@ -557,17 +572,26 @@ for /D %%G in (.\*) do (
 	popd
 )
 
-copy %third_party%\SqlCipher.dll ".\Solution Items\SQLCipher.dll"
-copy %third_party%\vcredist_x86.exe ".\tools\vcredist_x86.exe"
+copy %third_party%\netfx.exe ".\installer\netfx.exe"
+copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
+copy %third_party%\sqlcipher.dll ".\solution items\sqlcipher.dll"
+copy %third_party%\spellfix.dll ".\solution items\spellfix.dll"
+copy %third_party%\libcrypto-1_1-x64.dll ".\solution items\libcrypto-1_1-x64.dll"
 
 echo %version% > release-version
 call :SUB_NETBUILD santedb-sdk-ext.sln
 
 rem Copy applet files
-copy %output%\applets\*.pak bin\Release /y
-copy %output%\applets\sln\*.pak bin\Release /y
-call :SUB_BUILD_INSTALLER santedb-sdk.iss
-call :SUB_BUILD_TARBALL santedb-sdk bin\Release
+copy %output%\applets\*.pak santedb-tools\bin\Release /y
+copy %output%\applets\sln\*.pak santedb-tools\bin\Release /y
+
+rem Sign - since the new outputs are in santedb-tools\bin\Release
+pushd santedb-tools
+call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+popd
+
+call :SUB_BUILD_INSTALLER installer\santedb-sdk.iss
+call :SUB_BUILD_TARBALL santedb-sdk santedb-tools\bin\Release
 
 popd
 exit /B
@@ -617,7 +641,7 @@ popd
 
 echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
-call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW" "SanteDB.Rest.OAuth"
 popd 
 
 echo Building JavaScript BRE
@@ -688,9 +712,22 @@ popd
 if [%build_dcdr%] == [1] (
 	echo Building dCDR APIs
 	pushd santedb-dc-core
-	call :SUB_NETSTANDARD_BUILD "SanteDB.DisconnectedClient.i18n" "SanteDB.DisconnectedClient.Core" "SanteDB.DisconnectedClient.Core.SQLite" "SanteDB.DisconnectedClient.Ags" "SanteDB.DisconnectedClient.UI"
+	call :SUB_NETSTANDARD_BUILD "SanteDB.Client" "SanteDB.Client.Disconnected" "SanteDB.Client.Batteries"
 	popd
 )
+
+echo Building SanteDB Client Rest 
+pushd santedb-restsvc
+call :SUB_NETSTANDARD_BUILD "SanteDB.Rest.AppService" 
+
+popd 
+
+
+echo Building Data Persistence Modules
+pushd santedb-data
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Synchronization.ADO"
+popd
+
 
 if [%pubassets%] == [] (
 	echo Not Publishing Help!
@@ -851,6 +888,7 @@ exit /B
 :SUB_NETSTANDARD_BUILD 
 
 echo Build in %cd% the projects %1
+
 call :SUB_PRE_BUILD
 for %%P IN (%*) do (
 	if exist %%P (
@@ -874,6 +912,7 @@ echo Preparing assets : LICENSE, NOTICE, etc. for %cd%
 git checkout %branchbuild%
 git pull
 
+echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 copy ..\LICENSE /y
 copy ..\License.rtf /y
 copy ..\SanteDB.licenseheader /y
