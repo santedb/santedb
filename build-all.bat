@@ -639,6 +639,11 @@ pushd santedb-applets
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Applets"
 popd 
 
+echo Building SanteDB BouncyCastle Security CompilerServices
+pushd santedb-certs-bc
+call :SUB_NETSTANDARD_BUILD "SanteDB.Security.Certs.BouncyCastle"
+popd
+
 echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW" "SanteDB.Rest.OAuth"
@@ -709,18 +714,32 @@ pushd santedb-match
 call :SUB_NETSTANDARD_BUILD "SanteDB.Matcher"
 popd
 
-if [%build_dcdr%] == [1] (
-	echo Building dCDR APIs
-	pushd santedb-dc-core
-	call :SUB_NETSTANDARD_BUILD "SanteDB.Client" "SanteDB.Client.Disconnected" "SanteDB.Client.Batteries"
-	popd
-)
+
+echo Build Core Tools
+pushd santedb-tools
+call :SUB_NETSTANDARD_BUILD "SanteDB.PakMan.Common"
+popd
+
+
+echo Building dCDR APIs
+pushd santedb-dc-core
+call :SUB_NETSTANDARD_BUILD "SanteDB.Client"
+popd
+
+echo Build Core Tools
+pushd santedb-tools
+call :SUB_NETSTANDARD_BUILD "SanteDB.DevTools"
+popd
 
 echo Building SanteDB Client Rest 
 pushd santedb-restsvc
 call :SUB_NETSTANDARD_BUILD "SanteDB.Rest.AppService" 
-
 popd 
+
+echo Building dCDR APIs Part 2
+pushd santedb-dc-core
+call :SUB_NETSTANDARD_BUILD "SanteDB.Client.Disconnected" "SanteDB.Client.Batteries"
+popd
 
 
 echo Building Data Persistence Modules
