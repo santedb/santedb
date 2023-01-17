@@ -216,30 +216,20 @@ if exist "%cd%\inter.cer" (
 	set addlcerts=%cd%\inter.cer
 )
 
-if not exist "%third_party%\SqlCipher.dll" (
-	echo Missing %third_party%\SqlCipher.dll - Please compile SQLCipher and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
-	set shouldexit=1
-)
-
 if not exist "%third_party%\SpellFix.dll" (
 	echo Missing %third_party%\SpellFix.dll - Please compile Spellfix and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
 	set shouldexit=1
 )
 
 if not exist "%third_party%\netfx.exe" (
-	echo Missing %third_party%\netfx.exe - Please obtain .NET Redistributable and place in this location https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer
+	echo Missing %third_party%\netfx.exe - Please obtain .NET Redistributable and place in this location https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
 	set shouldexit=1
 )
 
-if not exist "%third_party%\libcrypto-1_1-x64.dll" (
-	echo Missing %third_party%\libcrypto-1_1-x64.dll - Please obtain OpenSSL 1.x runtime 
-	set shouldexit=1
-)
-
-if not exist "%third_party%\vc2010.exe" (
-	echo Missing %third_party%\vc2010.exe - Please obtain Visual C++ 2010 redistributable https://download.microsoft.com/download/A/8/0/A80747C3-41BD-45DF-B505-E9710D2744E0/vcredist_x64.exe
-	set shouldexit=1
-)
+rem if not exist "%third_party%\vc2010.exe" (
+rem 	echo Missing %third_party%\vc2010.exe - Please obtain Visual C++ 2010 redistributable https://download.microsoft.com/download/A/8/0/A80747C3-41BD-45DF-B505-E9710D2744E0/vcredist_x64.exe
+rem 	set shouldexit=1
+rem )
 
 if not exist "%third_party%\vc_redist.x64.exe" (
 	echo Missing %third_party%\vc_redist.x64.exe - Please obtain Visual C++ 2015/2017/2019/2022 Common Redistributable and place at this location https://aka.ms/vs/16/release/vc_redist.x86.exe
@@ -396,11 +386,20 @@ pushd santedb-www
 git checkout %branchBuild%
 
 
-copy "%third_party%\SqlCipher.dll" ".\Solution Items\SQLCipher.dll"
-copy "%third_party%\vcredist_x86.exe" ".\installsupp\vcredist_x86.exe"
+copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
 
 call :SUB_NETBUILD santedb-www.sln
+
+mkdir .\bin\Release\applets
+copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
+copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\applets
+copy %output%\applets\org.santedb.core.pak .\bin\release\applets
+copy %output%\applets\org.santedb.uicore.pak .\bin\release\applets
+copy %output%\applets\org.santedb.config.pak .\bin\release\applets
+copy %output%\applets\org.santedb.config.init.pak .\bin\release\applets
+copy %output%\applets\org.santedb..pak .\bin\release\applets
+
 
 call :SUB_BUILD_INSTALLER santedb-www.iss
 copy installsupp\install.sh bin\Release
@@ -489,9 +488,7 @@ for /D %%G in (.\*) do (
 	
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
 copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
-copy %third_party%\sqlcipher.dll ".\solution items\sqlcipher.dll"
 copy %third_party%\spellfix.dll ".\solution items\spellfix.dll"
-copy %third_party%\libcrypto-1_1-x64.dll ".\solution items\libcrypto-1_1-x64.dll"
 
 copy %output%\applets\sln\santedb.core.sln.pak SanteDB\Applets /y
 copy %output%\applets\sln\santedb.admin.sln.pak SanteDB\Applets /y
@@ -574,9 +571,7 @@ for /D %%G in (.\*) do (
 
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
 copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
-copy %third_party%\sqlcipher.dll ".\solution items\sqlcipher.dll"
 copy %third_party%\spellfix.dll ".\solution items\spellfix.dll"
-copy %third_party%\libcrypto-1_1-x64.dll ".\solution items\libcrypto-1_1-x64.dll"
 
 echo %version% > release-version
 call :SUB_NETBUILD santedb-sdk-ext.sln
