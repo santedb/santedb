@@ -381,6 +381,7 @@ rem ----------------------------- START BUILD WEB DCDR
 :SUB_DO_BUILD_WWW
 
 echo Cloning SanteDB WWW
+pushd "%buildPath%"
 git clone https://github.com/santedb/santedb-www
 pushd santedb-www
 git checkout %branchBuild%
@@ -410,12 +411,16 @@ call :SUB_BUILD_TARBALL santedb-www bin\Release
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-www
 
+popd
+popd
 exit /B
 
 rem ----------------------------- START SANTEMPI SERVER BUILD
 :SUB_DO_BUILD_SANTEMPI
 
 echo Cloning SanteMPI project
+pushd "%buildPath%"
+
 git clone https://github.com/santedb/santempi
 pushd santempi
 git checkout %branchBuild%
@@ -462,12 +467,14 @@ call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-mpi
 
 popd
+popd
 exit /B
 
 
 rem ----------------------------- START SANTEDB SERVER BUILD
 :SUB_DO_BUILD_SERVER
 
+pushd "%buildPath%"
 echo Cloning Server project
 git clone https://github.com/santedb/santedb-server
 pushd santedb-server
@@ -545,12 +552,14 @@ call :SUB_BUILD_DOCKER santedb-icdr
 popd
 popd
 popd
+popd
 exit /B
 
 
 rem ----------------------------- START SANTEDB SDK BUILD
 :SUB_DO_BUILD_SDK
 
+pushd "%buildPath%"
 echo Cloning SDK project
 git clone https://github.com/santedb/santedb-sdk
 pushd santedb-sdk
@@ -589,12 +598,15 @@ call :SUB_BUILD_INSTALLER installer\santedb-sdk.iss
 call :SUB_BUILD_TARBALL santedb-sdk santedb-tools\bin\Release
 
 popd
+popd
 exit /B
 
 
 rem ----------------------------- START SANTEDB CORE API BUILD
 :SUB_DO_BUILD_CORE 
 echo Cloning core project
+pushd "%buildPath%"
+
 git clone https://github.com/santedb/santedb
 
 pushd santedb
@@ -757,12 +769,13 @@ if [%pubassets%] == [] (
 )
 
 popd
-
+popd
 exit /B
 
 rem ----------------------------- BUILD CORE APPLETS
 :SUB_DO_BUILD_APPLETS
 
+pushd "%buildPath%"
 git clone https://github.com/santedb/applets
 pushd applets
 git checkout %branchBuild%
@@ -810,6 +823,7 @@ if exist "santedb" (
 	popd
 )
 
+popd
 exit /B
 
 :SUB_BUILD_DOCKER
