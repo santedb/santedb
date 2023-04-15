@@ -630,6 +630,11 @@ pushd santedb-fhir
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.FHIR"
 popd
 
+echo Build MDM Module
+pushd santedb-mdm
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.MDM"
+popd
+
 echo Building HL7 Module
 pushd santedb-hl7
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.HL7"
@@ -653,11 +658,6 @@ popd
 echo Building Data Persistence Modules
 pushd santedb-data
 call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO" "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
-popd
-
-echo Build MDM Module
-pushd santedb-mdm
-call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.MDM"
 popd
 
 echo Build SanteDB CDSS Module
