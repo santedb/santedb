@@ -163,8 +163,8 @@ if [%msbuild%] == [] (
 )
 
 if [%pakman%]==[] (
-	if exist "c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe" (
-		set pakman="c:\Program Files\SanteSuite\SanteDB\SDK\pakman.exe"
+	if exist "c:\Program Files\SanteSuite\SanteDB\SDK-V2\pakman.exe" (
+		set pakman="c:\Program Files\SanteSuite\SanteDB\SDK-V2\pakman.exe"
 	) else ( 
 		echo Can't find PAKMAN from SanteDB SDK set the pakman variable manually
 		set shouldexit=1
@@ -653,11 +653,6 @@ popd
 echo Build ORM Module
 pushd santedb-orm
 call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
-popd
-
-echo Building Data Persistence Modules
-pushd santedb-data
-call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO" "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
 popd
 
 echo Build SanteDB CDSS Module
