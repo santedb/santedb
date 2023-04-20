@@ -138,3 +138,15 @@ To build SanteDB on linux, you'll have to ensure that ~/.nugetstaging exists and
 ```
 $ ./build-nuget-staging
 ```
+
+# Important Resources
+
+SanteDB and its community partners SanteSuite Inc., and Fyfe Software Inc. provide a number of resources which may be useful for developers and implementers:
+
+* [SanteDB Help Wiki](https://help.santesuite.net)
+* [SanteDB Pontoon (for Translations)](https://pontoon.santesuite.net)
+* [SanteDB Jenkins (for Builds)](https://jenkins.fyfesoftware.ca)
+* [SanteDB NUGET Repository (for Nightly Builds)](https://baget.santesuite.net)
+* [SanteDB Demonstration Server (v2)](https://demompi.santesuite.net)
+* [SanteDB Demonstration Server (v3)](https://ncc-1701.santesuite.net)
+* [SanteDB Community](http://santesuite.org)

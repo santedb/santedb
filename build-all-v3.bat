@@ -28,6 +28,7 @@ set build_core=
 set build_mpi=
 set build_applets=
 set build_www=
+set build_dcdr=
 
 for %%P in (%*) do (
 	
@@ -50,7 +51,7 @@ for %%P in (%*) do (
 		echo    sdk	      -	Build the SDK
 		echo    applets   -	Build applets
 		echo    mpi	      -	Build SanteMPI
-		
+		echo    dcdr      - Build dCDR APIs
 		goto :end
 	)
 	if [%%P] == [nosign] (
@@ -65,11 +66,13 @@ for %%P in (%*) do (
 		set partial_build=1
 		set build_core=1
 		set build_dcg=1
+		set build_dcdr=1
 	)
 	if [%%P] == [www] (
 		set build_core=1
 		set partial_build=1
 		set build_www=1
+		set build_dcdr=1
 	)
 	if [%%P] == [core] (
 		set partial_build=1
@@ -79,6 +82,7 @@ for %%P in (%*) do (
 		set partial_build=1
 		set build_core=1
 		set build_sdk=1
+		set build_dcdr=1
 	)
 	if [%%P] == [applets] (
 		set partial_build=1
@@ -89,6 +93,10 @@ for %%P in (%*) do (
 		set build_core=1
 		set build_icdr=1
 		set build_mpi=1
+	)
+	if [%%P] == [dcdr] (
+		set partial_build=1
+		set build_dcdr=1
 	)
 	if [%%P] == [notag] (
 		set notag=1
@@ -122,6 +130,8 @@ if [%partial_build%] == [] (
 	set build_sdk=1
 	set build_mpi=1
 	set build_applets=1
+	set build_dcdr=1
+	
 )
 
 if [%zip%]==[] (
@@ -135,7 +145,7 @@ if [%zip%]==[] (
 if [%msbuild%] == [] (
 	if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe" (
 	        	echo will use VS 2022 Pro build tools
-        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe"
+        		set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin"
 	) else (
 		if exist "c:\Program Files (x86)\Microsoft Visual Studio\2019\Community\MSBuild\15.0\Bin\MSBuild.exe" (
 	        	echo will use VS 2019 Community build tools
@@ -175,8 +185,8 @@ if [%inno%] == [] (
 )
 
 if [%signtool%] == [] (
-	if exist "C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe" (
-		set signtool="C:\Program Files (x86)\Windows Kits\10\bin\10.0.17763.0\x64\signtool.exe"
+	if exist "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" (
+		set signtool="C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe"
 	) else (
 		echo Can't find signtool.exe set signtool environment variable manually
 		set shouldexit=1
@@ -206,23 +216,23 @@ if exist "%cd%\inter.cer" (
 	set addlcerts=%cd%\inter.cer
 )
 
-if not exist "%third_party%\SqlCipher.dll" (
-	echo Missing %third_party%\SqlCipher.dll - Please compile SQLCipher and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
+if not exist "%third_party%\SpellFix.dll" (
+	echo Missing %third_party%\SpellFix.dll - Please compile Spellfix and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
 	set shouldexit=1
 )
 
 if not exist "%third_party%\netfx.exe" (
-	echo Missing %third_party%\netfx.exe - Please obtain .NET Redistributable and place in this location https://dotnet.microsoft.com/download/dotnet-framework/thank-you/net472-web-installer
+	echo Missing %third_party%\netfx.exe - Please obtain .NET Redistributable and place in this location https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
 	set shouldexit=1
 )
 
-if not exist "%third_party%\vc2010.exe" (
-	echo Missing %third_party%\vc2010.exe - Please obtain Visual C++ 2010 redistributable https://download.microsoft.com/download/A/8/0/A80747C3-41BD-45DF-B505-E9710D2744E0/vcredist_x64.exe
-	set shouldexit=1
-)
+rem if not exist "%third_party%\vc2010.exe" (
+rem 	echo Missing %third_party%\vc2010.exe - Please obtain Visual C++ 2010 redistributable https://download.microsoft.com/download/A/8/0/A80747C3-41BD-45DF-B505-E9710D2744E0/vcredist_x64.exe
+rem 	set shouldexit=1
+rem )
 
-if not exist "%third_party%\vcredist_x86.exe" (
-	echo Missing %third_party%\vcredist_x86.exe - Please obtain Visual C++ 2015/2017/2019 Common Redistributable and place at this location https://aka.ms/vs/16/release/vc_redist.x86.exe
+if not exist "%third_party%\vc_redist.x64.exe" (
+	echo Missing %third_party%\vc_redist.x64.exe - Please obtain Visual C++ 2015/2017/2019/2022 Common Redistributable and place at this location https://aka.ms/vs/16/release/vc_redist.x86.exe
 	set shouldexit=1
 )
 
@@ -307,6 +317,9 @@ if [%build_www%] == [1] (
 if [%build_applets%] == [1] (
 	echo * Applets
 )
+if [%build_dcdr%] == [1] (
+	echo * dCDR
+)
 
 echo Confirm Build Settings (CTRL+C to cancel)
 pause
@@ -368,16 +381,26 @@ rem ----------------------------- START BUILD WEB DCDR
 :SUB_DO_BUILD_WWW
 
 echo Cloning SanteDB WWW
+pushd "%buildPath%"
 git clone https://github.com/santedb/santedb-www
 pushd santedb-www
 git checkout %branchBuild%
 
 
-copy "%third_party%\SqlCipher.dll" ".\Solution Items\SQLCipher.dll"
-copy "%third_party%\vcredist_x86.exe" ".\installsupp\vcredist_x86.exe"
+copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
 
 call :SUB_NETBUILD santedb-www.sln
+
+mkdir .\bin\Release\applets
+copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
+copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\applets
+copy %output%\applets\org.santedb.core.pak .\bin\release\applets
+copy %output%\applets\org.santedb.uicore.pak .\bin\release\applets
+copy %output%\applets\org.santedb.config.pak .\bin\release\applets
+copy %output%\applets\org.santedb.config.init.pak .\bin\release\applets
+copy %output%\applets\org.santedb..pak .\bin\release\applets
+
 
 call :SUB_BUILD_INSTALLER santedb-www.iss
 copy installsupp\install.sh bin\Release
@@ -388,12 +411,16 @@ call :SUB_BUILD_TARBALL santedb-www bin\Release
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-www
 
+popd
+popd
 exit /B
 
 rem ----------------------------- START SANTEMPI SERVER BUILD
 :SUB_DO_BUILD_SANTEMPI
 
 echo Cloning SanteMPI project
+pushd "%buildPath%"
+
 git clone https://github.com/santedb/santempi
 pushd santempi
 git checkout %branchBuild%
@@ -440,12 +467,14 @@ call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-mpi
 
 popd
+popd
 exit /B
 
 
 rem ----------------------------- START SANTEDB SERVER BUILD
 :SUB_DO_BUILD_SERVER
 
+pushd "%buildPath%"
 echo Cloning Server project
 git clone https://github.com/santedb/santedb-server
 pushd santedb-server
@@ -465,7 +494,8 @@ for /D %%G in (.\*) do (
 )
 	
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
-copy %third_party%\vc2010.exe ".\installer\vc2010.exe"
+copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
+copy %third_party%\spellfix.dll ".\solution items\spellfix.dll"
 
 copy %output%\applets\sln\santedb.core.sln.pak SanteDB\Applets /y
 copy %output%\applets\sln\santedb.admin.sln.pak SanteDB\Applets /y
@@ -480,6 +510,8 @@ call :SUB_BUILD_INSTALLER installer\sdbac.iss
 echo Copying LINUX Install Script
 copy .\installer\install.sh bin\Release\install.sh
 copy %addlcerts% bin\Release\inter.cer
+copy .\santedb-tools\bin\release\net4.8\sdbac.exe bin\release\sdbac.exe
+copy .\santedb-tools\bin\release\net4.8\sdbac.exe.config bin\release\sdbac.exe.config
 call :SUB_BUILD_TARBALL santedb-server bin\Release
 
 
@@ -498,8 +530,8 @@ copy "%cd%\bin\release\SanteDB.Messaging.HDSI.Client.dll" "sdbac-tmp"
 copy "%cd%\bin\release\SanteDB.Rest.Common.dll" "sdbac-tmp"
 copy "%cd%\bin\release\SanteDB.Server.AdminConsole.Api.dll" "sdbac-tmp"
 copy "%cd%\bin\release\SanteDB.Server.Core.dll" "sdbac-tmp"
-copy "%cd%\bin\release\sdbac.exe" "sdbac-tmp"
-copy "%cd%\bin\release\sdbac.exe.config" "sdbac-tmp"
+copy "%cd%\santedb-tools\bin\Release\net4.8\sdbac.exe" "sdbac-tmp"
+copy "%cd%\santedb-tools\bin\Release\net4.8\sdbac.exe.config" "sdbac-tmp"
 copy "%cd%\bin\release\SharpCompress.dll" "sdbac-tmp"
 copy "%cd%\bin\release\System.Buffers.dll" "sdbac-tmp"
 copy "%cd%\bin\release\System.Collections.Concurrent.dll" "sdbac-tmp"
@@ -520,12 +552,14 @@ call :SUB_BUILD_DOCKER santedb-icdr
 popd
 popd
 popd
+popd
 exit /B
 
 
 rem ----------------------------- START SANTEDB SDK BUILD
 :SUB_DO_BUILD_SDK
 
+pushd "%buildPath%"
 echo Cloning SDK project
 git clone https://github.com/santedb/santedb-sdk
 pushd santedb-sdk
@@ -544,18 +578,26 @@ for /D %%G in (.\*) do (
 	popd
 )
 
-copy %third_party%\SqlCipher.dll ".\Solution Items\SQLCipher.dll"
-copy %third_party%\vcredist_x86.exe ".\tools\vcredist_x86.exe"
+copy %third_party%\netfx.exe ".\installer\netfx.exe"
+copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
+copy %third_party%\spellfix.dll ".\solution items\spellfix.dll"
 
 echo %version% > release-version
 call :SUB_NETBUILD santedb-sdk-ext.sln
 
 rem Copy applet files
-copy %output%\applets\*.pak bin\Release /y
-copy %output%\applets\sln\*.pak bin\Release /y
-call :SUB_BUILD_INSTALLER santedb-sdk.iss
-call :SUB_BUILD_TARBALL santedb-sdk bin\Release
+copy %output%\applets\*.pak santedb-tools\bin\Release /y
+copy %output%\applets\sln\*.pak santedb-tools\bin\Release /y
 
+rem Sign - since the new outputs are in santedb-tools\bin\Release
+pushd santedb-tools
+call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+popd
+
+call :SUB_BUILD_INSTALLER installer\santedb-sdk.iss
+call :SUB_BUILD_TARBALL santedb-sdk santedb-tools\bin\Release
+
+popd
 popd
 exit /B
 
@@ -563,6 +605,8 @@ exit /B
 rem ----------------------------- START SANTEDB CORE API BUILD
 :SUB_DO_BUILD_CORE 
 echo Cloning core project
+pushd "%buildPath%"
+
 git clone https://github.com/santedb/santedb
 
 pushd santedb
@@ -589,7 +633,7 @@ popd
 
 echo Building SanteDB API
 pushd santedb-api
-call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Api"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Api" "SanteDB.Core.TestFramework"
 popd 
 
 echo Building SanteDB Docker Core
@@ -602,9 +646,14 @@ pushd santedb-applets
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Applets"
 popd 
 
+echo Building SanteDB BouncyCastle Security CompilerServices
+pushd santedb-certs-bc
+call :SUB_NETSTANDARD_BUILD "SanteDB.Security.Certs.BouncyCastle"
+popd
+
 echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
-call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI","SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW" "SanteDB.Rest.OAuth"
 popd 
 
 echo Building JavaScript BRE
@@ -637,6 +686,11 @@ pushd santedb-orm
 call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
 popd
 
+echo Building Data Persistence Modules
+pushd santedb-data
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO" "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
+popd
+
 echo Build MDM Module
 pushd santedb-mdm
 call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.MDM"
@@ -667,10 +721,39 @@ pushd santedb-match
 call :SUB_NETSTANDARD_BUILD "SanteDB.Matcher"
 popd
 
+
+echo Build Core Tools
+pushd santedb-tools
+call :SUB_NETSTANDARD_BUILD "SanteDB.PakMan.Common"
+popd
+
+
 echo Building dCDR APIs
 pushd santedb-dc-core
-call :SUB_NETSTANDARD_BUILD "SanteDB.DisconnectedClient.i18n" "SanteDB.DisconnectedClient.Core" "SanteDB.DisconnectedClient.Core.SQLite" "SanteDB.DisconnectedClient.Ags" "SanteDB.DisconnectedClient.UI"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Client"
 popd
+
+echo Build Core Tools
+pushd santedb-tools
+call :SUB_NETSTANDARD_BUILD "SanteDB.DevTools"
+popd
+
+echo Building SanteDB Client Rest 
+pushd santedb-restsvc
+call :SUB_NETSTANDARD_BUILD "SanteDB.Rest.AppService" 
+popd 
+
+echo Building dCDR APIs Part 2
+pushd santedb-dc-core
+call :SUB_NETSTANDARD_BUILD "SanteDB.Client.Disconnected" "SanteDB.Client.Batteries"
+popd
+
+
+echo Building Data Persistence Modules
+pushd santedb-data
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Synchronization.ADO"
+popd
+
 
 if [%pubassets%] == [] (
 	echo Not Publishing Help!
@@ -686,12 +769,13 @@ if [%pubassets%] == [] (
 )
 
 popd
-
+popd
 exit /B
 
 rem ----------------------------- BUILD CORE APPLETS
 :SUB_DO_BUILD_APPLETS
 
+pushd "%buildPath%"
 git clone https://github.com/santedb/applets
 pushd applets
 git checkout %branchBuild%
@@ -739,6 +823,7 @@ if exist "santedb" (
 	popd
 )
 
+popd
 exit /B
 
 :SUB_BUILD_DOCKER
@@ -831,6 +916,7 @@ exit /B
 :SUB_NETSTANDARD_BUILD 
 
 echo Build in %cd% the projects %1
+
 call :SUB_PRE_BUILD
 for %%P IN (%*) do (
 	if exist %%P (
@@ -854,6 +940,7 @@ echo Preparing assets : LICENSE, NOTICE, etc. for %cd%
 git checkout %branchbuild%
 git pull
 
+echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 copy ..\LICENSE /y
 copy ..\License.rtf /y
 copy ..\SanteDB.licenseheader /y
