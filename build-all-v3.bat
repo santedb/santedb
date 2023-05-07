@@ -646,6 +646,17 @@ pushd santedb-applets
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Applets"
 popd 
 
+
+echo Building BIS Module
+pushd santedb-bis
+call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
+popd
+
+echo Build ORM Module
+pushd santedb-orm
+call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
+popd
+
 echo Building SanteDB BouncyCastle Security CompilerServices
 pushd santedb-certs-bc
 call :SUB_NETSTANDARD_BUILD "SanteDB.Security.Certs.BouncyCastle"
@@ -674,16 +685,6 @@ popd
 echo Building OpenAPI Module
 pushd santedb-openapi
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.OpenAPI"
-popd
-
-echo Building BIS Module
-pushd santedb-bis
-call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
-popd
-
-echo Build ORM Module
-pushd santedb-orm
-call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
 popd
 
 echo Building Data Persistence Modules
