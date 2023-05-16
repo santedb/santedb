@@ -29,6 +29,7 @@ set build_mpi=
 set build_applets=
 set build_www=
 set build_dcdr=
+set build_guard=
 
 for %%P in (%*) do (
 	
@@ -52,6 +53,7 @@ for %%P in (%*) do (
 		echo    applets   -	Build applets
 		echo    mpi	      -	Build SanteMPI
 		echo    dcdr      - Build dCDR APIs
+		echo    guard	  - Build SanteGuard
 		goto :end
 	)
 	if [%%P] == [nosign] (
@@ -67,6 +69,11 @@ for %%P in (%*) do (
 		set build_core=1
 		set build_dcg=1
 		set build_dcdr=1
+	)
+	if [%%P] == [guard] (
+		set partial_build=1
+		set build_guard=1
+		rem set build_core=1
 	)
 	if [%%P] == [www] (
 		set build_core=1
@@ -131,7 +138,7 @@ if [%partial_build%] == [] (
 	set build_mpi=1
 	set build_applets=1
 	set build_dcdr=1
-	
+	set build_guard=1
 )
 
 if [%zip%]==[] (
@@ -320,6 +327,9 @@ if [%build_applets%] == [1] (
 if [%build_dcdr%] == [1] (
 	echo * dCDR
 )
+if [%build_guard%] == [1] (
+	echo * SanteGuard
+)
 
 echo Confirm Build Settings (CTRL+C to cancel)
 pause
@@ -354,6 +364,10 @@ if [%build_icdr%] == [1] (
 	echo Building Server FROM %cd%
 	call :SUB_DO_BUILD_SERVER
 )
+if [%build_guard%] == [1] (
+	echo Building SanteGuard from %cd%
+	call :SUB_DO_BUILD_GUARD
+)
 if [%build_mpi%] == [1] (
 	echo Building MPI FROM %cd%
 	call :SUB_DO_BUILD_SANTEMPI
@@ -377,6 +391,24 @@ if [%pubassets%]==[] (
 goto :end
 
 
+rem ----------------------------- START BUILD SANTEGUARD
+:SUB_DO_BUILD_GUARD
+echo Cloning SanteGuard 
+pushd "%buildpath%"
+git clone https://github.com/santedb/santeguard
+pushd santeguard
+git checkout %branchbuild%
+
+call :SUB_PRE_BUILD
+call :SUB_BUILD_APPLET applet org.santedb.sg
+call :SUB_NETSTANDARD_BUILD_PROJ
+call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+call :SUB_NETSTANDARD_PACK
+
+popd
+popd
+exit /B
+
 rem ----------------------------- START BUILD WEB DCDR
 :SUB_DO_BUILD_WWW
 
@@ -385,7 +417,6 @@ pushd "%buildPath%"
 git clone https://github.com/santedb/santedb-www
 pushd santedb-www
 git checkout %branchBuild%
-
 
 copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
@@ -649,7 +680,7 @@ popd
 
 echo Building BIS Module
 pushd santedb-bis
-call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
+call :SUB_NETSTANDARD_BUILD "SanteDB.BI"
 popd
 
 echo Build ORM Module
@@ -666,6 +697,11 @@ echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW" "SanteDB.Rest.OAuth"
 popd 
+
+echo Building BIS Module
+pushd santedb-bis
+call :SUB_NETSTANDARD_BUILD "SanteDB.Rest.BIS"
+popd
 
 echo Building JavaScript BRE
 pushd santedb-bre-js
