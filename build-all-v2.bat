@@ -778,6 +778,7 @@ set pkgname=%1
 mkdir "%pkgname%-%version%"
 copy "%2\*.dll" "%pkgname%-%version%" /y
 copy "%2\*.exe" "%pkgname%-%version%" /y
+copy "%2\*.exe.config" "%pkgname%-%version%" /y
 copy "%2\*.pak" "%pkgname%-%version%" /y
 copy "%2\*.xml" "%pkgname%-%version%" /y
 copy "%2\*.bat" "%pkgname%-%version%" /y

@@ -885,6 +885,8 @@ set pkgname=%1
 mkdir "%pkgname%-%version%"
 copy "%2\*.dll" "%pkgname%-%version%" /y
 copy "%2\*.exe" "%pkgname%-%version%" /y
+copy "%2\*.exe.config" "%pkgname%-%version%" /y
+
 copy "%2\*.pak" "%pkgname%-%version%" /y
 copy "%2\*.xml" "%pkgname%-%version%" /y
 copy "%2\*.bat" "%pkgname%-%version%" /y
@@ -1000,7 +1002,7 @@ echo Build in %cd% the solution %1
 
 git checkout %branchbuild%
 git pull
-
+call :SUB_PRE_BUILD
 call :SUB_NETBUILD_PROJ %1
 call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 
