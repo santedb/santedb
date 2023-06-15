@@ -102,7 +102,10 @@ for %%P in (%*) do (
 		set notag=1
 	)
 	if [%%P] == [sign] (
+		echo "To sign release installers (Authenticode) you have elected to use your own certificate."
 		set /p signkey=Enter the hash for your signing key:
+		echo "To sign applets and docker container contents you have elected to use your own community issued signing certificate."
+		set /p commkey=Enter the hash of your community signing key:
 	)
 	if [%%P] == [pubnuget] (
 		set /p nugetkey=Enter your nuget key:
@@ -119,6 +122,10 @@ for %%P in (%*) do (
 	if [%%P] == [pubassets] (
 		set /p pubassets=Enter publish location for help:
 		set /p pubassetsuser=Enter user to publish for help:
+	)
+	if [%%P] == [commkey] (
+		echo "To sign applets and docker container contents you have elected to use your own community issued signing certificate."
+		set /p commkey=Enter the hash of your community signing key:
 	)
 )
 
@@ -247,7 +254,11 @@ if [%shouldexit%] == [1] (
 )
 
 if [%commkey%] == [] (
-	set commkey=f3bea1ee156254656669f00c03eeafe8befc4441
+	if [%signkey%] == [] (
+		set commkey=f3bea1ee156254656669f00c03eeafe8befc4441
+	) else (
+		set commkey = %signkey%
+	)
 )
 
 set target=NugetRelease
