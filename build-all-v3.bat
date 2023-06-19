@@ -40,12 +40,13 @@ for %%P in (%*) do (
 		echo    nosign    -	Don't append digital signatures to the outputs
 		echo    notag     -	Don't create a version tag in GIT
 		echo    sign      -	Sign with a custom key
+		echo    commsign  -	Sign with a custom community key
 		echo    pubnuget  -	Publish packages to nuget
 		echo    debug     -	Build in DEBUG mode
 		echo    nodocker  -	Do not build the docker containers
 		echo    keepbuild -	Keep the temporary build directory
 		echo Projects:
-		echo    icdr      - 	Build iCDR Server
+		echo    icdr      - Build iCDR Server
 		echo    dcg	      -	Build Disconnected Gateway
 		echo    www       -	Build the WWW server
 		echo    core      -	Build the core APIs
@@ -108,8 +109,13 @@ for %%P in (%*) do (
 	if [%%P] == [notag] (
 		set notag=1
 	)
+	if [%%P] == [commsign] (
+		set /p commkey=Enter the hash for your community issued signing key:
+	) 
 	if [%%P] == [sign] (
-		set /p signkey=Enter the hash for your signing key:
+		set /p signkey=Enter the hash for your commercial  signing key:
+		set /p signops=Enter options for signtool:
+		
 	)
 	if [%%P] == [pubnuget] (
 		set /p nugetkey=Enter your nuget key:
@@ -402,7 +408,7 @@ git checkout %branchbuild%
 call :SUB_PRE_BUILD
 call :SUB_BUILD_APPLET applet org.santedb.sg
 call :SUB_NETSTANDARD_BUILD_PROJ
-call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_NETSTANDARD_PACK
 
 popd
@@ -622,7 +628,7 @@ copy %output%\applets\sln\*.pak santedb-tools\bin\Release /y
 
 rem Sign - since the new outputs are in santedb-tools\bin\Release
 pushd santedb-tools
-call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 popd
 
 call :SUB_BUILD_INSTALLER installer\santedb-sdk.iss
@@ -962,7 +968,7 @@ for %%P IN (%*) do (
 		pushd %%P
 		echo Will build project in %cd%
 		call :SUB_NETSTANDARD_BUILD_PROJ
-		call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+		call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 		call :SUB_NETSTANDARD_PACK
 		popd 
 	) else (
@@ -1004,6 +1010,7 @@ git checkout %branchbuild%
 git pull
 call :SUB_PRE_BUILD
 call :SUB_NETBUILD_PROJ %1
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 
 FOR /R "%cd%" %%G IN (*.nuspec) DO (
@@ -1036,41 +1043,23 @@ if [%nosign%] == [] (
 	) else (
 		for %%P IN (%*) do (
 			if exist "..\bin" (
-				for /R "..\bin" %%Q IN (%%P*.dll) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q" 
-					)
-				)
 				for /R "..\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			) else (
-				for /R ".\bin" %%Q IN (%%P*.dll) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
-					)
-				)
 				for /R ".\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			)
