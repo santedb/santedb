@@ -1054,23 +1054,10 @@ if [%notag%] == [] (
 		git tag %version%
 		git push --tags
 	) else (
-		echo Will merge %branchBuild% to master at %cd%
 		git checkout %branchBuild%
-		git pull
-		echo %version% > release-version
-		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
-		git add *
-		git commit -am "BuildBot: Added release version"
-		git push
-		git checkout master
-		git merge %branchBuild% 
-		git checkout --theirs *
-		git add *
-		git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
 		git tag v%version% -m "BuildBot: Version %version% release"
 		git push
 		git push --tags
-		git checkout %branchBuild%
 	)
 ) else (
 	echo ------ MERGING and TAGGING DISABLED
