@@ -29,6 +29,8 @@ set build_mpi=
 set build_applets=
 set build_www=
 set build_dcdr=
+set build_guard=
+set do_merge=
 
 for %%P in (%*) do (
 	
@@ -39,12 +41,14 @@ for %%P in (%*) do (
 		echo    nosign    -	Don't append digital signatures to the outputs
 		echo    notag     -	Don't create a version tag in GIT
 		echo    sign      -	Sign with a custom key
+		echo    commsign  -	Sign with a custom community key
 		echo    pubnuget  -	Publish packages to nuget
 		echo    debug     -	Build in DEBUG mode
 		echo    nodocker  -	Do not build the docker containers
 		echo    keepbuild -	Keep the temporary build directory
+		echo	merge     - Merge the results to master
 		echo Projects:
-		echo    icdr      - 	Build iCDR Server
+		echo    icdr      - Build iCDR Server
 		echo    dcg	      -	Build Disconnected Gateway
 		echo    www       -	Build the WWW server
 		echo    core      -	Build the core APIs
@@ -52,7 +56,11 @@ for %%P in (%*) do (
 		echo    applets   -	Build applets
 		echo    mpi	      -	Build SanteMPI
 		echo    dcdr      - Build dCDR APIs
+		echo    guard	  - Build SanteGuard
 		goto :end
+	)
+	if [%%P] == [merge] (
+		set do_merge=1
 	)
 	if [%%P] == [nosign] (
 		set nosign=1
@@ -67,6 +75,11 @@ for %%P in (%*) do (
 		set build_core=1
 		set build_dcg=1
 		set build_dcdr=1
+	)
+	if [%%P] == [guard] (
+		set partial_build=1
+		set build_guard=1
+		rem set build_core=1
 	)
 	if [%%P] == [www] (
 		set build_core=1
@@ -101,11 +114,13 @@ for %%P in (%*) do (
 	if [%%P] == [notag] (
 		set notag=1
 	)
+	if [%%P] == [commsign] (
+		set /p commkey=Enter the hash for your community issued signing key:
+	) 
 	if [%%P] == [sign] (
-		echo "To sign release installers (Authenticode) you have elected to use your own certificate."
-		set /p signkey=Enter the hash for your signing key:
-		echo "To sign applets and docker container contents you have elected to use your own community issued signing certificate."
-		set /p commkey=Enter the hash of your community signing key:
+		set /p signkey=Enter the hash for your commercial  signing key:
+		set /p signops=Enter options for signtool:
+		
 	)
 	if [%%P] == [pubnuget] (
 		set /p nugetkey=Enter your nuget key:
@@ -138,7 +153,7 @@ if [%partial_build%] == [] (
 	set build_mpi=1
 	set build_applets=1
 	set build_dcdr=1
-	
+	set build_guard=1
 )
 
 if [%zip%]==[] (
@@ -331,6 +346,9 @@ if [%build_applets%] == [1] (
 if [%build_dcdr%] == [1] (
 	echo * dCDR
 )
+if [%build_guard%] == [1] (
+	echo * SanteGuard
+)
 
 echo Confirm Build Settings (CTRL+C to cancel)
 pause
@@ -365,6 +383,10 @@ if [%build_icdr%] == [1] (
 	echo Building Server FROM %cd%
 	call :SUB_DO_BUILD_SERVER
 )
+if [%build_guard%] == [1] (
+	echo Building SanteGuard from %cd%
+	call :SUB_DO_BUILD_GUARD
+)
 if [%build_mpi%] == [1] (
 	echo Building MPI FROM %cd%
 	call :SUB_DO_BUILD_SANTEMPI
@@ -388,6 +410,24 @@ if [%pubassets%]==[] (
 goto :end
 
 
+rem ----------------------------- START BUILD SANTEGUARD
+:SUB_DO_BUILD_GUARD
+echo Cloning SanteGuard 
+pushd "%buildpath%"
+git clone https://github.com/santedb/santeguard
+pushd santeguard
+git checkout %branchbuild%
+
+call :SUB_PRE_BUILD
+call :SUB_BUILD_APPLET applet org.santedb.sg
+call :SUB_NETSTANDARD_BUILD_PROJ
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
+call :SUB_NETSTANDARD_PACK
+
+popd
+popd
+exit /B
+
 rem ----------------------------- START BUILD WEB DCDR
 :SUB_DO_BUILD_WWW
 
@@ -396,7 +436,6 @@ pushd "%buildPath%"
 git clone https://github.com/santedb/santedb-www
 pushd santedb-www
 git checkout %branchBuild%
-
 
 copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
@@ -602,7 +641,7 @@ copy %output%\applets\sln\*.pak santedb-tools\bin\Release /y
 
 rem Sign - since the new outputs are in santedb-tools\bin\Release
 pushd santedb-tools
-call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 popd
 
 call :SUB_BUILD_INSTALLER installer\santedb-sdk.iss
@@ -660,7 +699,7 @@ popd
 
 echo Building BIS Module
 pushd santedb-bis
-call :SUB_NETSTANDARD_BUILD "SanteDB.BI" "SanteDB.Rest.BIS"
+call :SUB_NETSTANDARD_BUILD "SanteDB.BI"
 popd
 
 echo Build ORM Module
@@ -677,6 +716,11 @@ echo Building SanteDB Rest-Service Core
 pushd santedb-restsvc
 call :SUB_NETSTANDARD_BUILD "SanteDB.Core.Model.AMI" "SanteDB.Core.Model.HDSI" "SanteDB.Core.Model.ViewModelSerializers" "SanteDB.Rest.Common" "SanteDB.Rest.AMI" "SanteDB.Rest.HDSI" "SanteDB.Rest.WWW" "SanteDB.Rest.OAuth"
 popd 
+
+echo Building BIS Module
+pushd santedb-bis
+call :SUB_NETSTANDARD_BUILD "SanteDB.Rest.BIS"
+popd
 
 echo Building JavaScript BRE
 pushd santedb-bre-js
@@ -860,6 +904,8 @@ set pkgname=%1
 mkdir "%pkgname%-%version%"
 copy "%2\*.dll" "%pkgname%-%version%" /y
 copy "%2\*.exe" "%pkgname%-%version%" /y
+copy "%2\*.exe.config" "%pkgname%-%version%" /y
+
 copy "%2\*.pak" "%pkgname%-%version%" /y
 copy "%2\*.xml" "%pkgname%-%version%" /y
 copy "%2\*.bat" "%pkgname%-%version%" /y
@@ -935,7 +981,7 @@ for %%P IN (%*) do (
 		pushd %%P
 		echo Will build project in %cd%
 		call :SUB_NETSTANDARD_BUILD_PROJ
-		call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+		call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 		call :SUB_NETSTANDARD_PACK
 		popd 
 	) else (
@@ -975,8 +1021,9 @@ echo Build in %cd% the solution %1
 
 git checkout %branchbuild%
 git pull
-
+call :SUB_PRE_BUILD
 call :SUB_NETBUILD_PROJ %1
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 
 FOR /R "%cd%" %%G IN (*.nuspec) DO (
@@ -1009,41 +1056,23 @@ if [%nosign%] == [] (
 	) else (
 		for %%P IN (%*) do (
 			if exist "..\bin" (
-				for /R "..\bin" %%Q IN (%%P*.dll) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q" 
-					)
-				)
 				for /R "..\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			) else (
-				for /R ".\bin" %%Q IN (%%P*.dll) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
-					)
-				)
 				for /R ".\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			)
@@ -1144,12 +1173,14 @@ if [%notag%] == [] (
 		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 		git add *
 		git commit -am "BuildBot: Added release version"
-		git push
-		git checkout master
-		git merge %branchBuild% 
-		git checkout --theirs *
-		git add *
-		git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
+		if [%do_merge%] == [1] (
+			git push
+			git checkout master
+			git merge %branchBuild% 
+			git checkout --theirs *
+			git add *
+			git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
+		)
 		git tag v%version% -m "BuildBot: Version %version% release"
 		git push
 		git push --tags

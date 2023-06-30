@@ -39,6 +39,7 @@ for %%P in (%*) do (
 		echo    nosign    -	Don't append digital signatures to the outputs
 		echo    notag     -	Don't create a version tag in GIT
 		echo    sign      -	Sign with a custom key
+		echo    commsign  -	Sign with a custom community key
 		echo    pubnuget  -	Publish packages to nuget
 		echo    debug     -	Build in DEBUG mode
 		echo    nodocker  -	Do not build the docker containers
@@ -101,8 +102,13 @@ for %%P in (%*) do (
 	if [%%P] == [notag] (
 		set notag=1
 	)
+	if [%%P] == [commsign] (
+		set /p commkey=Enter the hash for your community signing key:
+	)
 	if [%%P] == [sign] (
-		set /p signkey=Enter the hash for your signing key:
+		set /p signkey=Enter the hash for your commercial  signing key:
+		set /p signops=Enter options for signtool:
+		
 	)
 	if [%%P] == [pubnuget] (
 		set /p nugetkey=Enter your nuget key:
@@ -778,6 +784,7 @@ set pkgname=%1
 mkdir "%pkgname%-%version%"
 copy "%2\*.dll" "%pkgname%-%version%" /y
 copy "%2\*.exe" "%pkgname%-%version%" /y
+copy "%2\*.exe.config" "%pkgname%-%version%" /y
 copy "%2\*.pak" "%pkgname%-%version%" /y
 copy "%2\*.xml" "%pkgname%-%version%" /y
 copy "%2\*.bat" "%pkgname%-%version%" /y
@@ -852,7 +859,7 @@ for %%P IN (%*) do (
 		pushd %%P
 		echo Will build project in %cd%
 		call :SUB_NETSTANDARD_BUILD_PROJ
-		call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+		call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 		call :SUB_NETSTANDARD_PACK
 		popd 
 	) else (
@@ -893,7 +900,7 @@ git checkout %branchbuild%
 git pull
 
 call :SUB_NETBUILD_PROJ %1
-call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 
 FOR /R "%cd%" %%G IN (*.nuspec) DO (
 	echo Packing NUGET module %%~pG
@@ -925,41 +932,23 @@ if [%nosign%] == [] (
 	) else (
 		for %%P IN (%*) do (
 			if exist "..\bin" (
-				for /R "..\bin" %%Q IN (%%P*.dll) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q" 
-					)
-				)
 				for /R "..\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			) else (
-				for /R ".\bin" %%Q IN (%%P*.dll) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
-					)
-				)
 				for /R ".\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			)
@@ -1053,23 +1042,10 @@ if [%notag%] == [] (
 		git tag %version%
 		git push --tags
 	) else (
-		echo Will merge %branchBuild% to master at %cd%
 		git checkout %branchBuild%
-		git pull
-		echo %version% > release-version
-		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
-		git add *
-		git commit -am "BuildBot: Added release version"
-		git push
-		git checkout master
-		git merge %branchBuild% 
-		git checkout --theirs *
-		git add *
-		git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
 		git tag v%version% -m "BuildBot: Version %version% release"
 		git push
 		git push --tags
-		git checkout %branchBuild%
 	)
 ) else (
 	echo ------ MERGING and TAGGING DISABLED
