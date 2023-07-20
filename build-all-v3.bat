@@ -30,6 +30,7 @@ set build_applets=
 set build_www=
 set build_dcdr=
 set build_guard=
+set noinstaller=
 
 for %%P in (%*) do (
 	
@@ -45,17 +46,21 @@ for %%P in (%*) do (
 		echo    debug     -	Build in DEBUG mode
 		echo    nodocker  -	Do not build the docker containers
 		echo    keepbuild -	Keep the temporary build directory
+		echo    noinstaller - Do not build an installer
 		echo Projects:
 		echo    icdr      - Build iCDR Server
 		echo    dcg	      -	Build Disconnected Gateway
 		echo    www       -	Build the WWW server
 		echo    core      -	Build the core APIs
 		echo    sdk	      -	Build the SDK
-		echo    applets   -	Build applets
-		echo    mpi	      -	Build SanteMPI
+		echo    applets   - Build applets
+		echo    mpi       - Build SanteMPI
 		echo    dcdr      - Build dCDR APIs
-		echo    guard	  - Build SanteGuard
+		echo    guard     - Build SanteGuard
 		goto :end
+	)
+	if [%%P] == [noinstaller] (
+		set noinstaller=1
 	)
 	if [%%P] == [nosign] (
 		set nosign=1
@@ -935,8 +940,15 @@ exit /B
 
 echo Will build installer using %1 in %cd%
 
-%inno% "/o%output%\" "%1" /d"MyAppVersion=%version%"
-
+if [%noinstaller%] == [1] (
+	echo Skipping installer
+) else (
+	if [%signkey%] == [] (
+		%inno% "/o%output%" "%1" /d"MyAppVersion=%version%" /d"SignKey=%commkey%"
+	) else (
+		%inno% "/o%output%" "%1" /d"MyAppVersion=%version%" /d"SignKey=%signkey%" /d"SignOpts=%signops%"
+	)
+)
 exit /B
 
 :SUB_BUILD_APPLET
@@ -1172,7 +1184,10 @@ if [%notag%] == [] (
 		git checkout %branchBuild%
 	)
 ) else (
-	echo ------ MERGING and TAGGING DISABLED
+	echo ------ MERGING and TAGGING DISABLED WILL PUSH NEW VERSION CODES 
+	git add *
+	git commit -am "BuildBot: Added release version"
+	git push
 )
 exit /B
 :end 
