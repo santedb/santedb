@@ -31,6 +31,7 @@ set build_www=
 set build_dcdr=
 set build_guard=
 set noinstaller=
+set mergebuild=
 
 for %%P in (%*) do (
 	
@@ -47,6 +48,7 @@ for %%P in (%*) do (
 		echo    nodocker  -	Do not build the docker containers
 		echo    keepbuild -	Keep the temporary build directory
 		echo    noinstaller - Do not build an installer
+		echo    mergebuild  - Merge the build into master branch
 		echo Projects:
 		echo    icdr      - Build iCDR Server
 		echo    dcg	      -	Build Disconnected Gateway
@@ -58,6 +60,9 @@ for %%P in (%*) do (
 		echo    dcdr      - Build dCDR APIs
 		echo    guard     - Build SanteGuard
 		goto :end
+	)
+	if [%%P] == [merge] (
+		set mergebuild=1
 	)
 	if [%%P] == [noinstaller] (
 		set noinstaller=1
@@ -1173,15 +1178,21 @@ if [%notag%] == [] (
 		git add *
 		git commit -am "BuildBot: Added release version"
 		git push
-		git checkout master
-		git merge %branchBuild% 
-		git checkout --theirs *
-		git add *
-		git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
+		
+		if [%mergebuild%] == [1] (
+			git checkout master
+			git merge %branchBuild% 
+			git checkout --theirs *
+			git add *
+			git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
+		)
+
 		git tag v%version% -m "BuildBot: Version %version% release"
 		git push
 		git push --tags
-		git checkout %branchBuild%
+		if [%mergebuild%] == [1] (
+			git checkout %branchBuild%
+		)
 	)
 ) else (
 	echo ------ MERGING and TAGGING DISABLED WILL PUSH NEW VERSION CODES 
