@@ -72,12 +72,12 @@ for %%P in (%*) do (
 	)
 	if [%%P] == [icdr] (
 		set partial_build=1
-		set build_core=1
+		rem set build_core=1
 		set build_icdr=1
 	)
 	if [%%P] == [dcg] (
 		set partial_build=1
-		set build_core=1
+		rem set build_core=1
 		set build_dcg=1
 		set build_dcdr=1
 	)
@@ -87,7 +87,7 @@ for %%P in (%*) do (
 		rem set build_core=1
 	)
 	if [%%P] == [www] (
-		set build_core=1
+		rem set build_core=1
 		set partial_build=1
 		set build_www=1
 		set build_dcdr=1
@@ -98,7 +98,7 @@ for %%P in (%*) do (
 	)
 	if [%%P] == [sdk] (
 		set partial_build=1
-		set build_core=1
+		rem set build_core=1
 		set build_sdk=1
 		set build_dcdr=1
 	)
@@ -108,7 +108,7 @@ for %%P in (%*) do (
 	)
 	if [%%P] == [mpi] (
 		set partial_build=1
-		set build_core=1
+		rem set build_core=1
 		set build_icdr=1
 		set build_mpi=1
 	)
@@ -307,7 +307,7 @@ if [%nosign%] == [1] (
 	echo Community Key = %commkey%
 	echo Additional Certificate Chain = %addlcerts% (set from inter.cer file)
 )
-if ([%nodocker%] == [1] (
+if ([%nodocker%] == [1]) (
 	echo Docker = DISABLED
 )
 if [%notag%] == [1] (
@@ -646,7 +646,9 @@ copy %output%\applets\sln\*.pak santedb-tools\bin\Release /y
 
 rem Sign - since the new outputs are in santedb-tools\bin\Release
 pushd santedb-tools
+echo Will Sign Tools
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
+call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 popd
 
 call :SUB_BUILD_INSTALLER installer\santedb-sdk.iss
@@ -732,24 +734,25 @@ pushd santedb-bre-js
 call :SUB_NETSTANDARD_BUILD "SanteDB.BusinessRules.JavaScript"
 popd
 
-echo Building FHIR Module
-pushd santedb-fhir
-call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.FHIR"
-popd
-
-echo Building HL7 Module
-pushd santedb-hl7
-call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.HL7"
-popd
-
 echo Building OpenAPI Module
 pushd santedb-openapi
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.OpenAPI"
 popd
 
+
+echo Build SanteDB Match Module
+pushd santedb-match
+call :SUB_NETSTANDARD_BUILD "SanteDB.Matcher"
+popd
+
 echo Building Data Persistence Modules
 pushd santedb-data
 call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO" "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
+popd
+
+echo Building FHIR Module
+pushd santedb-fhir
+call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.FHIR"
 popd
 
 echo Build MDM Module
@@ -777,11 +780,6 @@ pushd santedb-cache-memory
 call :SUB_NETSTANDARD_BUILD "SanteDB.Caching.Memory"
 popd
 
-echo Build SanteDB Match Module
-pushd santedb-match
-call :SUB_NETSTANDARD_BUILD "SanteDB.Matcher"
-popd
-
 
 echo Build Core Tools
 pushd santedb-tools
@@ -792,6 +790,12 @@ popd
 echo Building dCDR APIs
 pushd santedb-dc-core
 call :SUB_NETSTANDARD_BUILD "SanteDB.Client"
+popd
+
+
+echo Building HL7 Module
+pushd santedb-hl7
+call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.HL7"
 popd
 
 echo Build Core Tools
@@ -1035,6 +1039,8 @@ git checkout %branchbuild%
 git pull
 call :SUB_PRE_BUILD
 call :SUB_NETBUILD_PROJ %1
+
+echo Will Sign Project
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_SIGNASM SanteDB SanteMPI SanteGuard
 
@@ -1045,7 +1051,7 @@ FOR /R "%cd%" %%G IN (*.nuspec) DO (
 	popd
 )
 
-
+echo Well Tag GIT Repository
 call :SUB_GIT_TAG
 
 exit /B
@@ -1064,6 +1070,7 @@ exit /B
 
 if [%nosign%] == [] (
 	if [%signkey%]==[] (
+		echo Vendor key not present - %signkey%
 		call :SUB_SIGNASM_SDB_COMM %*
 	) else (
 		for %%P IN (%*) do (
