@@ -12,6 +12,7 @@ if exist %output% (
 	mkdir %output%
 )
 
+set sqlite_version=2.2.1
 set configuration=Release
 set third_party="%cd%\third-party"
 echo Determing Toolchain Environment
@@ -29,6 +30,8 @@ set build_mpi=
 set build_applets=
 set build_www=
 set build_dcdr=
+set build_emr=
+set build_ims=
 set build_guard=
 set noinstaller=
 set mergebuild=
@@ -59,6 +62,8 @@ for %%P in (%*) do (
 		echo    mpi       - Build SanteMPI
 		echo    dcdr      - Build dCDR APIs
 		echo    guard     - Build SanteGuard
+		echo    emr       - Build SanteEMR
+		echo    ims       - Build SanteIMS
 		goto :end
 	)
 	if [%%P] == [merge] (
@@ -75,11 +80,30 @@ for %%P in (%*) do (
 		rem set build_core=1
 		set build_icdr=1
 	)
+	if [%%P] == [ims] (
+		set partial_build=1
+		rem set build_core=1
+		set build_dcdr=1
+		set build_ims=1
+		set build_emr=1
+		set build_applets=1
+
+	)
+	if [%%P] == [emr] (
+		set partial_build=1
+		rem set build_core=1
+		set build_dcdr=1
+		set build_emr=1
+		set build_applets=1
+
+	)
 	if [%%P] == [dcg] (
 		set partial_build=1
 		rem set build_core=1
 		set build_dcg=1
 		set build_dcdr=1
+		set build_applets=1
+
 	)
 	if [%%P] == [guard] (
 		set partial_build=1
@@ -159,6 +183,9 @@ if [%partial_build%] == [] (
 	set build_applets=1
 	set build_dcdr=1
 	set build_guard=1
+	set build_dcg=1
+	set build_ims=1
+	set build_emr=1
 )
 
 if [%zip%]==[] (
@@ -342,6 +369,12 @@ if [%build_mpi%] == [1] (
 if [%build_dcg%] == [1] (
 	echo * Disconnected Gateway
 )
+if [%build_ims%] == [1] (
+	echo * SanteEMR
+)
+if [%build_ims%] == [1] (
+	echo * SanteIMS
+)
 if [%build_www%] == [1] (
 	echo * WWW Service
 )
@@ -400,6 +433,19 @@ if [%build_www%] == [1] (
 	echo Building WWW FROM %cd%
 	call :SUB_DO_BUILD_WWW
 )
+if [%build_dcg%] == [1] (
+	echo Building DCG FROM %cd%
+	call :SUB_DO_BUILD_DCG
+)
+if [%build_emr%] == [1] (
+	echo Building EMR from %cd%
+	call :SUB_DO_BUILD_EMR
+)
+if [%build_ims%] == [1] (
+	echo Building IMS from %cd%
+	call :SUB_DO_BUILD_IMS
+)
+
 popd 
 
 rem Publishing
@@ -433,6 +479,48 @@ popd
 popd
 exit /B
 
+rem ----------------------------- START BUILD DCDR
+:SUB_DO_BUILD_DCG
+
+echo Clone SanteDB DCG
+
+pushd "%buildPath%"
+git clone https://github.com/santedb/santedb-dcg
+pushd santedb-dcg
+
+git checkout %branchBuild%
+
+copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
+copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
+
+call :SUB_NETBUILD santedb-dcg.sln
+
+
+mkdir .\bin\Release\applets
+copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
+copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\applets
+copy %output%\applets\org.santedb.core.pak .\bin\release\applets
+copy %output%\applets\org.santedb.bicore.pak .\bin\release\applets
+copy %output%\applets\org.santedb.config.pak .\bin\release\applets
+copy %output%\applets\org.santedb.config.init.pak .\bin\release\applets
+copy %output%\applets\org.santedb.uicore.pak .\bin\release\applets
+copy %output%\applets\org.santedb.hl7.pak .\bin\release\applets
+copy %output%\applets\org.santedb.fhir.pak .\bin\release\applets
+copy %output%\applets\org.santedb.sg.pak .\bin\release\applets
+
+call :SUB_BUILD_INSTALLER santedb-dcg.iss
+
+copy installsupp\install.sh bin\Release
+copy %addlcerts% bin\Release\inter.cer
+
+call :SUB_BUILD_TARBALL santedb-dcg bin\Release
+call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
+call :SUB_BUILD_DOCKER santedb-dcg
+
+popd
+popd
+exit /B
+
 rem ----------------------------- START BUILD WEB DCDR
 :SUB_DO_BUILD_WWW
 
@@ -451,10 +539,10 @@ mkdir .\bin\Release\applets
 copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
 copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\applets
 copy %output%\applets\org.santedb.core.pak .\bin\release\applets
-copy %output%\applets\org.santedb.uicore.pak .\bin\release\applets
+copy %output%\applets\org.santedb.bicore.pak .\bin\release\applets
 copy %output%\applets\org.santedb.config.pak .\bin\release\applets
 copy %output%\applets\org.santedb.config.init.pak .\bin\release\applets
-copy %output%\applets\org.santedb..pak .\bin\release\applets
+copy %output%\applets\org.santedb.uicore.pak .\bin\release\applets
 
 
 call :SUB_BUILD_INSTALLER santedb-www.iss
@@ -609,7 +697,6 @@ popd
 popd
 popd
 exit /B
-
 
 rem ----------------------------- START SANTEDB SDK BUILD
 :SUB_DO_BUILD_SDK
@@ -837,6 +924,80 @@ popd
 popd
 exit /B
 
+rem ----------------------------- BUILD EMR APPLETS
+:SUB_DO_BUILD_EMR
+
+pushd "%buildpath%"
+git clone https://github.com/santedb/santeemr
+pushd santeemr
+
+echo Building EMR Applet in %cd%
+git checkout %branchBuild%
+
+call :SUB_BUILD_APPLET admin org.santedb.emr.admin
+call :SUB_BUILD_APPLET user org.santedb.emr
+
+call :SUB_GIT_TAG
+
+if [%nosign%] == [1] (
+	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" 
+	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" 
+) else (
+	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" --sign --certHash=%commkey% --embedcert
+)
+
+
+mkdir Release
+mkdir Release\applets
+copy "%output%\applets\sln\santedb.emr.admin.sln.pak" release\applets
+copy "%output%\applets\sln\santedb.emr.sln.pak" release\applets
+mkdir release\data
+copy .\data\* release\data
+
+call :SUB_BUILD_TARBALL santedb-emr release\
+
+popd
+popd
+exit /B
+rem ----------------------------- BUILD SANTEIMS
+:SUB_DO_BUILD_IMS
+
+pushd "%buildpath%"
+git clone https://github.com/santedb/santeims
+pushd santeims
+
+git checkout %branchBuild%
+echo Build IMS C# Plugin in %cd%
+pushd plugins
+call :SUB_NETSTANDARD_BUILD "SanteDB.Ims"
+popd
+
+echo Build IMS Applets in %cd%
+call :SUB_BUILD_APPLET applet org.santedb.ims
+
+if [%nosign%] == [1] (
+	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" 
+) else (
+	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" --sign --certHash=%commkey% --embedcert
+)
+
+mkdir release
+copy .\plugins\SanteDB.Ims\SanteDB.Ims\bin\%configuration%\netstandard2.0\SanteIMS.* release\
+mkdir release\data
+copy data\* release\data
+mkdir release\applets 
+copy %output%\applets\sln\santedb.ims.sln.pak release\applets
+mkdir release\config
+mkdir release\config\template
+copy plugins\SanteDB.Ims\SanteDB.Ims\config\* release\config
+copy plugins\SanteDB.Ims\SanteDB.Ims\config\template\* release\config\template
+
+call :SUB_BUILD_TARBALL santedb-ims release\
+
+popd
+popd
+exit /B
 rem ----------------------------- BUILD CORE APPLETS
 :SUB_DO_BUILD_APPLETS
 
@@ -931,6 +1092,17 @@ xcopy /I /S /Y "%2\Sample\*.*" "%pkgname%-%version%\sample"
 xcopy /I /S /Y "%2\plugins\*.*" "%pkgname%-%version%\plugins"
 xcopy /I /S /Y "%2\matching\*.*" "%pkgname%-%version%\matching"
 xcopy /I /S /Y "%2\data\*.*" "%pkgname%-%version%\data"
+
+rem COPY RUNTIMES FOR LINUX INTO OUR TARBALL
+if exist "%2\runtimes" (
+	echo Will slipstream runtimes from %userprofile%\.nuget\packages\sqlitespellfix.lib.e_sqlite3mc\%sqlite_version%\runtimes to %pkgname%-%version%\runtimes
+	for /D %%G in (%userprofile%\.nuget\packages\sqlitespellfix.lib.e_sqlite3mc\%sqlite_version%\runtimes\linux-*) do (
+		echo %%G to %pkgname%-%version%\runtimes\%%~nxG 
+		xcopy /I /S /Y %%G %pkgname%-%version%\runtimes\%%~nxG
+	)	
+)
+
+xcopy /I /S /Y "%2\runtimes\*.*" "%pkgname%-%version%\runtimes"
 xcopy /I /S /Y "%2\applets\*.*" "%pkgname%-%version%\applets"
 
 move %pkgname%-%version%\Data %pkgname%-%version%\_data
