@@ -393,7 +393,11 @@ pause
 echo Will build release of SanteDB (entire Suite)
 
 rem ------------------------------ CREATE BUILD DIRECTORY 
-set "buildPath=%tmp%\sdb~%RANDOM%"
+
+if [%buildPath%] == [] (
+	set "buildPath=%tmp%\sdb~%RANDOM%"
+)
+
 echo Will build in %buildPath%
 if not exist "%buildPath%" (
 	mkdir %buildPath%
