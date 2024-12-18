@@ -66,6 +66,9 @@ for %%P in (%*) do (
 		echo    ims       - Build SanteIMS
 		goto :end
 	)
+	if [%%P] == [nocommit] (
+		set nocommit=1
+	)
 	if [%%P] == [merge] (
 		set mergebuild=1
 	)
@@ -939,6 +942,7 @@ echo Building EMR Applet in %cd%
 git checkout %branchBuild%
 
 call :SUB_BUILD_APPLET admin org.santedb.emr.admin
+call :SUB_BUILD_APPLET common org.santedb.emr.common
 call :SUB_BUILD_APPLET user org.santedb.emr
 
 call :SUB_GIT_TAG
@@ -1385,10 +1389,12 @@ if [%notag%] == [] (
 		)
 	)
 ) else (
-	echo ------ MERGING and TAGGING DISABLED WILL PUSH NEW VERSION CODES 
-	git add *
-	git commit -am "BuildBot: Added release version"
-	git push
+	if [%nocommit%] == [] (
+		echo ------ MERGING and TAGGING DISABLED WILL PUSH NEW VERSION CODES 
+		git add *
+		git commit -am "BuildBot: Added release version"
+		git push
+	)
 )
 exit /B
 :end 
