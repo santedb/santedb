@@ -638,7 +638,7 @@ for /D %%G in (.\*) do (
 	if exist ".git" (
 		echo Pulling %branchBuild% on %%G
 		git checkout %branchBuild%
-		git pull
+		git pull --no-edit
 	)
 	popd
 )
@@ -722,7 +722,7 @@ for /D %%G in (.\*) do (
 	if exist ".git" (
 		echo Pulling %branchBuild% on %%G
 		git checkout %branchBuild%
-		git pull
+		git pull --no-edit
 	)
 	popd
 )
@@ -1192,7 +1192,7 @@ exit /B
 echo Preparing assets : LICENSE, NOTICE, etc. for %cd%
 
 git checkout %branchbuild%
-git pull
+git pull --no-edit
 
 echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 copy ..\LICENSE /y
@@ -1216,7 +1216,7 @@ exit /B
 echo Build in %cd% the solution %1
 
 git checkout %branchbuild%
-git pull
+git pull --no-edit
 call :SUB_PRE_BUILD
 call :SUB_NETBUILD_PROJ %1
 
@@ -1258,20 +1258,20 @@ if [%nosign%] == [] (
 				for /R "..\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			) else (
 				for /R ".\bin" %%Q IN (*.exe) DO (
 					echo Signing %%Q with vendor key
 					if [%addlcerts%] == [] (
-						%signtool% sign %signopts% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 					) else (
 						echo Signing with additional certs from %addlcerts%
-						%signtool% sign %signopts% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+						%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 					)
 				)
 			)
@@ -1303,7 +1303,7 @@ if [%nosign%] == [] (
 			for /R ".\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with community key
 				%signtool% sign /sha1 %commkey% /d "SanteDB"  "%%Q"
-			)
+			) 
 		)
 	)
 )
@@ -1367,7 +1367,7 @@ if [%notag%] == [] (
 	) else (
 		echo Will merge %branchBuild% to master at %cd%
 		git checkout %branchBuild%
-		git pull
+		git pull --no-edit
 		echo %version% > release-version
 		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 		git add *
@@ -1376,7 +1376,7 @@ if [%notag%] == [] (
 		
 		if [%mergebuild%] == [1] (
 			git checkout master
-			git merge %branchBuild% 
+			git merge %branchBuild%  --no-edit
 			git checkout --theirs *
 			git add *
 			git commit -am "BuildBot: Merged from %branchBuild% for release of version %version%"
