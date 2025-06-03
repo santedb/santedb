@@ -273,10 +273,10 @@ if exist "%cd%\inter.cer" (
 	set addlcerts=%cd%\inter.cer
 )
 
-if not exist "%third_party%\SpellFix.dll" (
-	echo Missing %third_party%\SpellFix.dll - Please compile Spellfix and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
-	set shouldexit=1
-)
+rem if not exist "%third_party%\SpellFix.dll" (
+rem	echo Missing %third_party%\SpellFix.dll - Please compile Spellfix and place in this location - build from C++ from https://github.com/santedb/SqlCipher-Amalgamated
+rem 	set shouldexit=1
+rem )
 
 if not exist "%third_party%\netfx.exe" (
 	echo Missing %third_party%\netfx.exe - Please obtain .NET Redistributable and place in this location https://dotnet.microsoft.com/en-us/download/dotnet-framework/thank-you/net48-web-installer
@@ -841,7 +841,7 @@ popd
 
 echo Building Data Persistence Modules
 pushd santedb-data
-call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO" "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Data" "SanteDB.Persistence.Auditing.ADO" "SanteDB.Persistence.PubSub.ADO"  "SanteDB.Core.TestFramework.FirebirdSQL" "SanteDB.Core.TestFramework.SQLite"
 popd
 
 echo Building FHIR Module
@@ -874,6 +874,11 @@ pushd santedb-cache-memory
 call :SUB_NETSTANDARD_BUILD "SanteDB.Caching.Memory"
 popd
 
+echo Building Sync Data Persistence Modules
+pushd santedb-data
+call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Synchronization.ADO"
+popd
+
 
 echo Build Core Tools
 pushd santedb-tools
@@ -904,7 +909,7 @@ popd
 
 echo Building dCDR APIs Part 2
 pushd santedb-dc-core
-call :SUB_NETSTANDARD_BUILD "SanteDB.Client.Disconnected" "SanteDB.Client.Batteries"
+call :SUB_NETSTANDARD_BUILD "SanteDB.Client.Shared" "SanteDB.Client.Disconnected" "SanteDB.Client.Batteries"
 popd
 
 
