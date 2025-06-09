@@ -808,7 +808,7 @@ pushd santedb-orm
 call :SUB_NETSTANDARD_BUILD "SanteDB.OrmLite"
 popd
 
-echo Building SanteDB BouncyCastle Security CompilerServices
+echo Building SanteDB BouncyCastle Security 
 pushd santedb-certs-bc
 call :SUB_NETSTANDARD_BUILD "SanteDB.Security.Certs.BouncyCastle"
 popd
@@ -832,7 +832,6 @@ echo Building OpenAPI Module
 pushd santedb-openapi
 call :SUB_NETSTANDARD_BUILD "SanteDB.Messaging.OpenAPI"
 popd
-
 
 echo Build SanteDB Match Module
 pushd santedb-match
@@ -1333,7 +1332,7 @@ if [%nugetkey%]==[] (
 ) else (
 	echo Publishing NUPKG
 	for /R %%F IN (*.nupkg) DO (
-		 dotnet nuget push "%%F" -s https://api.nuget.org/v3/index.json -k %nugetkey%
+		 dotnet nuget push "%%F" -s https://api.nuget.org/v3/index.json --skip-duplicate -k %nugetkey%
 	)
 ) 
 			
