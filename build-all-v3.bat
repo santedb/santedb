@@ -584,7 +584,7 @@ call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
 	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" 
 ) else (
-	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedcert --sign --certHash=%commkey% 
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedCert --sign --certHash=%commkey% 
 )
 
 call :SUB_NETBUILD santempi.sln
@@ -955,8 +955,8 @@ if [%nosign%] == [1] (
 	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" 
 	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" 
 ) else (
-	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" --sign --certHash=%commkey% --embedcert
-	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" --sign --certHash=%commkey% --embedCert
+	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" --sign --certHash=%commkey% --embedCert
 )
 
 
@@ -990,8 +990,10 @@ call :SUB_BUILD_APPLET applet org.santedb.ims
 
 if [%nosign%] == [1] (
 	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" 
+	%pakman% --compose --source=applet\santeims.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.admin.sln.pak" 
 ) else (
-	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" --sign --certHash=%commkey% --embedCert
+	%pakman% --compose --source=applet\santeims.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.admin.sln.pak" --sign --certHash=%commkey% --embedCert
 )
 
 mkdir release
@@ -1004,6 +1006,8 @@ mkdir release\config
 mkdir release\config\template
 copy plugins\SanteDB.Ims\SanteDB.Ims\config\* release\config
 copy plugins\SanteDB.Ims\SanteDB.Ims\config\template\* release\config\template
+copy "%output%\applets\sln\santedb.ims.admin.sln.pak" release\applets
+copy "%output%\applets\sln\santedb.ims.sln.pak" release\applets
 
 call :SUB_BUILD_TARBALL santedb-ims release\
 
@@ -1037,8 +1041,8 @@ if [%nosign%] == [1] (
 	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" 
 	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" 
 ) else (
-	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedcert
-	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedcert
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedCert
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedCert
 )
 
 call :SUB_GIT_TAG
@@ -1164,7 +1168,7 @@ if exist "manifest.xml" (
 	if [%nosign%] == [1] (
 		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
 	) else ( 
-		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedcert --install 
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install 
 	)
 )
 popd
