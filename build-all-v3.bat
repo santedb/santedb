@@ -476,6 +476,8 @@ git clone https://github.com/santedb/santeguard
 pushd santeguard
 git checkout %branchbuild%
 
+copy installsupp\install.sh bin\Release
+copy %addlcerts% bin\Release\inter.cer
 call :SUB_PRE_BUILD
 call :SUB_BUILD_APPLET applet org.santedb.sg
 call :SUB_NETSTANDARD_BUILD_PROJ
@@ -500,11 +502,11 @@ git checkout %branchBuild%
 copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
 
-call :SUB_NETBUILD santedb-dcg.sln
+call :SUB_NETBUILD santedb-dcg-nuget.sln
 
 
 mkdir .\bin\Release\applets
-copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
+rem copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
 copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\applets
 copy %output%\applets\org.santedb.core.pak .\bin\release\applets
 copy %output%\applets\org.santedb.bicore.pak .\bin\release\applets
@@ -539,6 +541,9 @@ git checkout %branchBuild%
 
 copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
+
+echo %version% > release-version
+echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 
 call :SUB_NETBUILD santedb-www.sln
 
@@ -579,6 +584,7 @@ git submodule init
 git submodule update --remote
 
 echo %version% > release-version
+echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 
 call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
@@ -651,6 +657,8 @@ copy %output%\applets\sln\santedb.core.sln.pak SanteDB\Applets /y
 copy %output%\applets\sln\santedb.admin.sln.pak SanteDB\Applets /y
 
 echo %version% > release-version
+echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+
 call :SUB_NETBUILD santedb-server-ext.sln
 
 call :SUB_BUILD_INSTALLER installer\santedb-icdr.iss
@@ -983,6 +991,8 @@ git checkout %branchBuild%
 echo Build IMS C# Plugin in %cd%
 pushd plugins
 call :SUB_NETSTANDARD_BUILD "SanteDB.Ims"
+call :SUB_SIGNASM_SDB_COMM SanteIMS
+call :SUB_SIGNASM SanteIMS
 popd
 
 echo Build IMS Applets in %cd%
@@ -997,7 +1007,7 @@ if [%nosign%] == [1] (
 )
 
 mkdir release
-copy .\plugins\SanteDB.Ims\SanteDB.Ims\bin\%configuration%\netstandard2.0\SanteIMS.* release\
+copy .\plugins\bin\%configuration%\netstandard2.0\SanteIMS.* release\
 mkdir release\data
 copy data\* release\data
 mkdir release\applets 
@@ -1168,7 +1178,7 @@ if exist "manifest.xml" (
 	if [%nosign%] == [1] (
 		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
 	) else ( 
-		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install 
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install
 	)
 )
 popd
@@ -1202,7 +1212,7 @@ echo Preparing assets : LICENSE, NOTICE, etc. for %cd%
 git checkout %branchbuild%
 git pull --no-edit
 
-echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+rem echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 copy ..\LICENSE /y
 copy ..\License.rtf /y
 copy ..\SanteDB.licenseheader /y
