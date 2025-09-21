@@ -953,6 +953,14 @@ pushd santeemr
 echo Building EMR Applet in %cd%
 git checkout %branchBuild%
 
+echo Build EMR C# Plugin in %cd%
+pushd plugins
+call :SUB_NETSTANDARD_BUILD "SanteDB.Emr"
+call :SUB_SIGNASM_SDB_COMM SanteEMR
+call :SUB_SIGNASM SanteEMR
+popd
+
+
 call :SUB_BUILD_APPLET admin org.santedb.emr.admin
 call :SUB_BUILD_APPLET common org.santedb.emr.common
 call :SUB_BUILD_APPLET user org.santedb.emr
@@ -969,6 +977,7 @@ if [%nosign%] == [1] (
 
 
 mkdir Release
+copy .\plugins\bin\%configuration%\netstandard2.0\SanteEMR.* release\
 mkdir Release\applets
 copy "%output%\applets\sln\santedb.emr.admin.sln.pak" release\applets
 copy "%output%\applets\sln\santedb.emr.sln.pak" release\applets
