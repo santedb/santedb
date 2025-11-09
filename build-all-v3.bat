@@ -772,7 +772,8 @@ pushd santedb
 git checkout %branchBuild%
 git submodule init
 git submodule update --remote
-
+git submodule foreach git checkout version/3.0 
+git submodule foreach git pull --no-edit
 echo Building RestSrvr
 
 pushd restsrvr
@@ -1194,27 +1195,6 @@ popd
 
 exit /B 
 
-:SUB_NETSTANDARD_BUILD 
-
-echo Build in %cd% the projects %1
-
-call :SUB_PRE_BUILD
-for %%P IN (%*) do (
-	if exist %%P (
-		pushd %%P
-		echo Will build project in %cd%
-		call :SUB_NETSTANDARD_BUILD_PROJ
-		call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
-		call :SUB_NETSTANDARD_PACK
-		popd 
-	) else (
-		echo No directory for %%P in %cd%
-	)
-)
-call :SUB_GIT_TAG
-set proj=
-exit /B
-
 :SUB_PRE_BUILD
 echo Preparing assets : LICENSE, NOTICE, etc. for %cd%
 
@@ -1261,6 +1241,31 @@ FOR /R "%cd%" %%G IN (*.nuspec) DO (
 echo Well Tag GIT Repository
 call :SUB_GIT_TAG
 
+exit /B
+
+
+:SUB_NETSTANDARD_BUILD 
+
+echo Build in %cd% the projects %1
+
+git checkout %branchbuild%
+git pull --no-edit
+
+call :SUB_PRE_BUILD
+for %%P IN (%*) do (
+	if exist %%P (
+		pushd %%P
+		echo Will build project in %cd%
+		call :SUB_NETSTANDARD_BUILD_PROJ
+		call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
+		call :SUB_NETSTANDARD_PACK
+		popd 
+	) else (
+		echo No directory for %%P in %cd%
+	)
+)
+call :SUB_GIT_TAG
+set proj=
 exit /B
 
 
