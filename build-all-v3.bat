@@ -476,6 +476,10 @@ git clone https://github.com/santedb/santeguard
 pushd santeguard
 git checkout %branchbuild%
 
+
+echo %version% > release-version
+echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+
 copy installsupp\install.sh bin\Release
 copy %addlcerts% bin\Release\inter.cer
 call :SUB_PRE_BUILD
@@ -497,7 +501,11 @@ pushd "%buildPath%"
 git clone https://github.com/santedb/santedb-dcg
 pushd santedb-dcg
 
+
 git checkout %branchBuild%
+
+echo %version% > release-version
+echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 
 copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
@@ -543,25 +551,25 @@ copy %third_party%\vc_redist.x64.exe ".\installsupp\vc_redist.x64.exe"
 copy "%third_party%\netfx.exe" ".\installsupp\netfx.exe"
 
 echo %version% > release-version
-echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 
 call :SUB_NETBUILD santedb-www.sln
 
-mkdir .\bin\Release\applets
-copy %output%\applets\org.santedb.admin.pak .\bin\release\applets
-copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\applets
-copy %output%\applets\org.santedb.core.pak .\bin\release\applets
-copy %output%\applets\org.santedb.bicore.pak .\bin\release\applets
-copy %output%\applets\org.santedb.config.pak .\bin\release\applets
-copy %output%\applets\org.santedb.config.init.pak .\bin\release\applets
-copy %output%\applets\org.santedb.uicore.pak .\bin\release\applets
+mkdir .\bin\Release\net48\applets
+copy %output%\applets\org.santedb.admin.pak .\bin\release\net48\applets
+copy %output%\applets\org.santedb.i18n.en.pak .\bin\release\net48\applets
+copy %output%\applets\org.santedb.core.pak .\bin\release\net48\applets
+copy %output%\applets\org.santedb.bicore.pak .\bin\release\net48\applets
+copy %output%\applets\org.santedb.config.pak .\bin\release\net48\applets
+copy %output%\applets\org.santedb.config.init.pak .\bin\release\net48\applets
+copy %output%\applets\org.santedb.uicore.pak .\bin\release\net48\applets
 
 
 call :SUB_BUILD_INSTALLER santedb-www.iss
-copy installsupp\install.sh bin\Release
+copy installsupp\install.sh bin\Release\net48
 copy %addlcerts% bin\Release\inter.cer
 
-call :SUB_BUILD_TARBALL santedb-www bin\Release
+call :SUB_BUILD_TARBALL santedb-www bin\Release\net48
 
 call :SUB_SIGNASM_SDB_COMM SanteDB SanteMPI SanteGuard
 call :SUB_BUILD_DOCKER santedb-www
@@ -584,7 +592,7 @@ git submodule init
 git submodule update --remote
 
 echo %version% > release-version
-echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 
 call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
@@ -657,7 +665,7 @@ copy %output%\applets\sln\santedb.core.sln.pak SanteDB\Applets /y
 copy %output%\applets\sln\santedb.admin.sln.pak SanteDB\Applets /y
 
 echo %version% > release-version
-echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 
 call :SUB_NETBUILD santedb-server-ext.sln
 
@@ -1201,7 +1209,7 @@ echo Preparing assets : LICENSE, NOTICE, etc. for %cd%
 git checkout %branchbuild%
 git pull --no-edit
 
-rem echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+rem echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 copy ..\LICENSE /y
 copy ..\License.rtf /y
 copy ..\SanteDB.licenseheader /y
@@ -1401,7 +1409,7 @@ if [%notag%] == [] (
 		git checkout %branchBuild%
 		git pull --no-edit
 		echo %version% > release-version
-		echo ^<Project^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
+		echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" Condition="'' != $([MSBuild]::GetPathOfFileAbove('Directory.Build.props', '$(MSBuildThisFileDirectory)../'))" /^>^<PropertyGroup^>^<VersionNumber^>%version%^<^/VersionNumber^>^<^/PropertyGroup^>^<^/Project^> > Directory.Build.props
 		git add *
 		git commit -am "BuildBot: Added release version"
 		git push
