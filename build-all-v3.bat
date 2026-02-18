@@ -1167,6 +1167,10 @@ FOR /R "%pkgname%-%version%" %%G IN (*.sh) DO (
 %zip% a -tgzip "%output%\%pkgname%-%version%.tar.gz" "%output%\%pkgname%-%version%.tar"
 
 rmdir /s /q %pkgname%-%version%
+mkdir "%pkgname%-%version%"
+copy "%2\*.pdb" "%pkgname%-%version%" /y
+%zip% a -r -tzip "%output%\%pkgname%-%version%-symbols.zip" "%pkgname%-%version%"
+rmdir /s /q %pkgname%-%version%
 exit /B
 
 :SUB_BUILD_INSTALLER
