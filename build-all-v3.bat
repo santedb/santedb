@@ -8,12 +8,7 @@ set version=%1
 
 if [%output%] == [] (
 	set output="%cd%\dist\%version%"
-
-	if exist %output% (
-		rmdir /s /q %output%
-		mkdir %output%
-	)
-
+	mkdir %output%
 )
 
 
