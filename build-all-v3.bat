@@ -5,12 +5,17 @@ setlocal EnableExtensions
 set shouldexit=0
 set branchBuild=%2
 set version=%1
-set output="%cd%\dist\%version%"
 
-if exist %output% (
-	rmdir /s /q %output%
-	mkdir %output%
+if [%output%] == [] (
+	set output="%cd%\dist\%version%"
+
+	if exist %output% (
+		rmdir /s /q %output%
+		mkdir %output%
+	)
+
 )
+
 
 set sqlite_version=2.2.1
 set configuration=Release
@@ -21,6 +26,7 @@ set netopt=
 set keepbuild=
 set addlcerts=
 set pubassets=
+set pubhelp=
 set partial_build=
 set build_icdr=
 set build_sdk=
@@ -35,6 +41,8 @@ set build_ims=
 set build_guard=
 set noinstaller=
 set mergebuild=
+set copydir=
+set noconfirm=
 
 for %%P in (%*) do (
 	
@@ -52,6 +60,7 @@ for %%P in (%*) do (
 		echo    keepbuild -	Keep the temporary build directory
 		echo    noinstaller - Do not build an installer
 		echo    mergebuild  - Merge the build into master branch
+		echo	pubassets	- Copy the output to a directory
 		echo Projects:
 		echo    icdr      - Build iCDR Server
 		echo    dcg	      -	Build Disconnected Gateway
@@ -64,6 +73,7 @@ for %%P in (%*) do (
 		echo    guard     - Build SanteGuard
 		echo    emr       - Build SanteEMR
 		echo    ims       - Build SanteIMS
+		echo	customer  - Build ..\customer.bat projects
 		goto :end
 	)
 	if [%%P] == [nocommit] (
@@ -82,6 +92,9 @@ for %%P in (%*) do (
 		set partial_build=1
 		rem set build_core=1
 		set build_icdr=1
+	)
+	if [%%P] == [noconfirm] (
+		set noconfirm=1
 	)
 	if [%%P] == [ims] (
 		set partial_build=1
@@ -147,15 +160,21 @@ for %%P in (%*) do (
 		set notag=1
 	)
 	if [%%P] == [commsign] (
-		set /p commkey=Enter the hash for your community issued signing key:
+		if [%commkey%] == [] (
+			set /p commkey=Enter the hash for your community issued signing key:
+		)
 	) 
 	if [%%P] == [sign] (
-		set /p signkey=Enter the hash for your commercial  signing key:
-		set /p signops=Enter options for signtool:
-		
+		if [%signkey%] == [] (
+			set /p signkey=Enter the hash for your commercial  signing key:
+			set /p signops=Enter options for signtool:
+		)
 	)
 	if [%%P] == [pubnuget] (
-		set /p nugetkey=Enter your nuget key:
+		set pubnuget=1
+		if [%nugetkey%] == [] (
+			set /p nugetkey=Enter your nuget key:
+		)
 	)
 	if [%%P] == [debug] (
 		set configuration=Debug
@@ -167,8 +186,11 @@ for %%P in (%*) do (
 		set keepbuild=1
 	)
 	if [%%P] == [pubassets] (
-		set /p pubassets=Enter publish location for help:
-		set /p pubassetsuser=Enter user to publish for help:
+		set pubassets=1
+	)
+	if [%%P] == [pubhelp] (
+		set /p pubhelp=Enter publish location for help:
+		set /p pubhelpuser=Enter user to publish for help:
 	)
 	if [%%P] == [commkey] (
 		echo "To sign applets and docker container contents you have elected to use your own community issued signing certificate."
@@ -392,7 +414,11 @@ if [%build_guard%] == [1] (
 )
 
 echo Confirm Build Settings (CTRL+C to cancel)
-pause
+
+if [%noconfirm%] == [] (
+	pause
+)
+
 echo Will build release of SanteDB (entire Suite)
 
 rem ------------------------------ CREATE BUILD DIRECTORY 
@@ -455,16 +481,6 @@ if [%build_ims%] == [1] (
 
 popd 
 
-rem Publishing
-if [%pubassets%]==[] (
-	echo Won't Publish Assets
-) else (
-	pushd %output% 
-	pushd ..
-	scp -r %version% %pubassetsuser%@%pubassets%:/var/www/html/santesuite/org/prod/assets/uploads/santedb/community/releases/
-	popd
-	popd
-)
 goto :end
 
 
@@ -732,16 +748,7 @@ git checkout %branchBuild%
 
 git submodule init
 git submodule update --remote
-
-for /D %%G in (.\*) do (
-	pushd %%G
-	if exist ".git" (
-		echo Pulling %branchBuild% on %%G
-		git checkout %branchBuild%
-		git pull --no-edit
-	)
-	popd
-)
+git submodule foreach git pull --no-edit 
 
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
 copy %third_party%\vc_redist.x64.exe ".\installer\vc_redist.x64.exe"
@@ -766,6 +773,7 @@ call :SUB_BUILD_TARBALL santedb-sdk santedb-tools\bin\Release
 
 popd
 popd
+
 exit /B
 
 
@@ -935,14 +943,14 @@ call :SUB_NETSTANDARD_BUILD "SanteDB.Persistence.Synchronization.ADO"
 popd
 
 
-if [%pubassets%] == [] (
+if [%pubhelp%] == [] (
 	echo Not Publishing Help!
 ) else (
 	pushd Help
 	dotnet build santedb.shfbproj  --configuration %configuration% /p:VersionNumber=%version%
 	if exist "output\index.html" (
 		pushd output
-		scp -r * %pubassetsuser%@%pubassets%:/var/www/html/santesuite/org/prod/assets/doc/net
+		scp -r * %pubhelpuser%@%pubhelp%:/var/www/html/santesuite/org/prod/assets/doc/net
 		popd
 	)
 	popd
@@ -1200,7 +1208,11 @@ if exist "manifest.xml" (
 	if [%nosign%] == [1] (
 		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
 	) else ( 
-		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install
+		if [%pubassets%] == [1] (
+			%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install --publish
+		) else (
+			%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install
+		)
 	)
 )
 popd
@@ -1297,26 +1309,24 @@ if [%nosign%] == [] (
 		echo Vendor key not present - %signkey%
 		call :SUB_SIGNASM_SDB_COMM %*
 	) else (
-		for %%P IN (%*) do (
-			if exist "..\bin" (
-				for /R "..\bin" %%Q IN (*.exe) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
-					)
+		if exist "..\bin" (
+			for /R "..\bin" %%Q IN (*.exe) DO (
+				echo Signing %%Q with vendor key
+				if [%addlcerts%] == [] (
+					%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+				) else (
+					echo Signing with additional certs from %addlcerts%
+					%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 				)
-			) else (
-				for /R ".\bin" %%Q IN (*.exe) DO (
-					echo Signing %%Q with vendor key
-					if [%addlcerts%] == [] (
-						%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
-					) else (
-						echo Signing with additional certs from %addlcerts%
-						%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
-					)
+			)
+		) else (
+			for /R ".\bin" %%Q IN (*.exe) DO (
+				echo Signing %%Q with vendor key
+				if [%addlcerts%] == [] (
+					%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+				) else (
+					echo Signing with additional certs from %addlcerts%
+					%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 				)
 			)
 		)
