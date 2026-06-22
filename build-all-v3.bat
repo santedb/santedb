@@ -748,6 +748,7 @@ git checkout %branchBuild%
 
 git submodule init
 git submodule update --remote
+git submodule foreach git checkout %branchBuild%
 git submodule foreach git pull --no-edit 
 
 copy %third_party%\netfx.exe ".\installer\netfx.exe"
@@ -1377,7 +1378,7 @@ if not exist "%output%\nuget" (
 copy bin\publish\*.nupkg "%output%\nuget"
 copy bin\publish\*.snupkg "%output%\nuget"
 
-if [%nugetkey%]==[] (
+if [%pubnuget%]==[] (
 	echo Will not push to NUGET if you want to push to NUGET set nugetkey environment variable
 ) else (
 	echo Publishing NUPKG
