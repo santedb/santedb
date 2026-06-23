@@ -14,7 +14,11 @@ if [%output%] == [] (
 
 set sqlite_version=2.2.1
 set configuration=Release
-set third_party="%cd%\third-party"
+
+if [%third_party%] == [] (
+	set third_party="%cd%\third-party"
+)
+
 echo Determing Toolchain Environment
 set netstandardopt=
 set netopt=
