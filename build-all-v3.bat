@@ -1343,20 +1343,20 @@ if [%nosign%] == [] (
 		if exist "..\bin" (
 			for /R "..\bin" %%Q IN (%%P*.dll) DO (
 				echo Signing %%Q with community key
-				%signtool% sign /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
 			)
 			for /R "..\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with community key
-				%signtool% sign /sha1 %commkey% /d "SanteDB"  "%%Q"
+				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB"  "%%Q"
 			)
 		) else (
 			for /R ".\bin" %%Q IN (%%P*.dll) DO (
 				echo Signing %%Q with community key
-				%signtool% sign /sha1 %commkey% /d "SanteDB APIs"  "%%Q"
+				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB APIs"  "%%Q"
 			)
 			for /R ".\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with community key
-				%signtool% sign /sha1 %commkey% /d "SanteDB"  "%%Q"
+				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB"  "%%Q"
 			) 
 		)
 	)
