@@ -350,7 +350,7 @@ echo From Branch = %branchBuild%
 echo Output = %output%
 echo Special netstandard options = %netstandardopt%
 echo Special net options = %netopt%
-
+echo Special pakman options = %pakmanopts%
 if [%nosign%] == [1] (
 	echo Sign = DISABLED
 ) else (
