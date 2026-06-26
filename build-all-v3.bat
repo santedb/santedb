@@ -613,8 +613,10 @@ echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Bui
 
 call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
+	echo Running %pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" %pakmanopts%
 	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" %pakmanopts%
 ) else (
+	echo Running %pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedCert --sign --certHash=%commkey%  %pakmanopts%
 	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedCert --sign --certHash=%commkey%  %pakmanopts%
 )
 
@@ -1027,11 +1029,11 @@ echo Build IMS Applets in %cd%
 call :SUB_BUILD_APPLET applet org.santedb.ims
 
 if [%nosign%] == [1] (
-	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" 
-	%pakman% --compose --source=applet\santeims.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.admin.sln.pak" 
+	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" %pakmanopts%
+	%pakman% --compose --source=applet\santeims.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.admin.sln.pak" %pakmanopts%
 ) else (
-	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" --sign --certHash=%commkey% --embedCert
-	%pakman% --compose --source=applet\santeims.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.admin.sln.pak" --sign --certHash=%commkey% --embedCert
+	%pakman% --compose --source=applet\santeims.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.sln.pak" --sign --certHash=%commkey% --embedCert %pakmanopts%
+	%pakman% --compose --source=applet\santeims.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.ims.admin.sln.pak" --sign --certHash=%commkey% --embedCert %pakmanopts%
 )
 
 mkdir release
@@ -1076,11 +1078,11 @@ if not exist "%output%\applets\sln" (
 )
 
 if [%nosign%] == [1] (
-	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" 
-	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" 
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak"  %pakmanopts%
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" %pakmanopts%
 ) else (
-	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedCert
-	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedCert
+	%pakman% --compose --source=santedb.core.sln.xml --version=%version% -o "%output%\applets\sln\santedb.core.sln.pak" --sign --certHash=%commkey% --embedCert %pakmanopts%
+	%pakman% --compose --source=santedb.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.admin.sln.pak" --sign --certHash=%commkey% --embedCert %pakmanopts%
 )
 
 call :SUB_GIT_TAG
@@ -1208,12 +1210,12 @@ if not exist "%output%\applets" (
 
 if exist "manifest.xml" (
 	if [%nosign%] == [1] (
-		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install 
+		%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --install %pakmanopts%
 	) else ( 
 		if [%pubassets%] == [1] (
-			%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install --publish
+			%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install --publish %pakmanopts%
 		) else (
-			%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install
+			%pakman% --compile --source=.\ --version=%version% --optimize --output="%output%\applets\%2.pak" --sign --certHash=%commkey% --embedCert --install %pakmanopts%
 		)
 	)
 )
