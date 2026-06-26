@@ -1191,9 +1191,9 @@ if [%noinstaller%] == [1] (
 	echo Skipping installer
 ) else (
 	if [%signkey%] == [] (
-		%inno% "/o%output%" "%1" /d"MyAppVersion=%version%" /d"SignKey=%commkey%"
+		%inno% "/o%output%" "%1" /d"MyAppVersion=%version%" /d"SignKey=%commkey%" /S"default=%signtool% sign $p"
 	) else (
-		%inno% "/o%output%" "%1" /d"MyAppVersion=%version%" /d"SignKey=%signkey%" /d"SignOpts=%signops%"
+		%inno% "/o%output%" "%1" /d"MyAppVersion=%version%" /d"SignKey=%signkey%" /d"SignOpts=%signops%" /S"default=%signtool% sign $p"
 	)
 )
 exit /B
