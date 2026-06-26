@@ -11,6 +11,7 @@ if [%output%] == [] (
 	mkdir %output%
 )
 
+dotnet nuget add source %localappdata%\NugetRelease --name="Local Release"
 
 set sqlite_version=2.2.1
 set configuration=Release
@@ -611,9 +612,9 @@ echo ^<Project^>^<Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Bui
 
 call :SUB_BUILD_APPLET applet org.santedb.smpi
 if [%nosign%] == [1] (
-	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" 
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak" %pakmanopts%
 ) else (
-	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedCert --sign --certHash=%commkey% 
+	%pakman% --compose --version=%version% --source=santempi.sln.xml -o "%output%\applets\sln\santempi.sln.pak"  --embedCert --sign --certHash=%commkey%  %pakmanopts%
 )
 
 call :SUB_NETBUILD santempi.sln
@@ -985,11 +986,11 @@ call :SUB_BUILD_APPLET user org.santedb.emr
 call :SUB_GIT_TAG
 
 if [%nosign%] == [1] (
-	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" 
-	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" 
+	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak"  %pakmanopts%
+	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak"  %pakmanopts%
 ) else (
-	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" --sign --certHash=%commkey% --embedCert
-	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" --sign --certHash=%commkey% --embedCert
+	%pakman% --compose --source=admin\santedb.emr.admin.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.admin.sln.pak" --sign --certHash=%commkey% --embedCert %pakmanopts%
+	%pakman% --compose --source=user\santedb.emr.sln.xml --version=%version% -o "%output%\applets\sln\santedb.emr.sln.pak" --sign --certHash=%commkey% --embedCert %pakmanopts%
 )
 
 
