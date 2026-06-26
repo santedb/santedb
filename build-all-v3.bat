@@ -358,6 +358,7 @@ if [%nosign%] == [1] (
 	echo Vendor Key = %signkey% - set from signkey environment variable
 	echo Community Key = %commkey%
 	echo Additional Certificate Chain = %addlcerts% (set from inter.cer file)
+	echo Sign Settings: %signops%
 )
 if ([%nodocker%] == [1]) (
 	echo Docker = DISABLED
