@@ -6,8 +6,11 @@ set shouldexit=0
 set branchBuild=%2
 set version=%1
 
+
 if [%output%] == [] (
 	set output="%cd%\dist\%version%"
+)
+if not exist %output% (
 	mkdir %output%
 )
 
@@ -265,7 +268,7 @@ if [%inno%] == [] (
 
 if [%signtool%] == [] (
 	if exist "C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe" (
-		set signtool="C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe"
+		set "signtool=C:\Program Files (x86)\Microsoft SDKs\ClickOnce\SignTool\signtool.exe"
 	) else (
 		echo Can't find signtool.exe set signtool environment variable manually
 		set shouldexit=1
@@ -1317,20 +1320,20 @@ if [%nosign%] == [] (
 			for /R "..\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with vendor key
 				if [%addlcerts%] == [] (
-					%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					"%signtool%" sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 				) else (
 					echo Signing with additional certs from %addlcerts%
-					%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+					"%signtool%" sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 				)
 			)
 		) else (
 			for /R ".\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with vendor key
 				if [%addlcerts%] == [] (
-					%signtool% sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
+					"%signtool%" sign %signops% /sha1 %signkey% /d "SanteDB Core APIs"  "%%Q"
 				) else (
 					echo Signing with additional certs from %addlcerts%
-					%signtool% sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
+					"%signtool%" sign %signops% /sha1 %signkey% /ac "%addlcerts%" /d "SanteDB Core APIs"  "%%Q"
 				)
 			)
 		)
@@ -1347,20 +1350,20 @@ if [%nosign%] == [] (
 		if exist "..\bin" (
 			for /R "..\bin" %%Q IN (%%P*.dll) DO (
 				echo Signing %%Q with community key
-				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
+				"%signtool%" sign %signops% /sha1 %commkey% /d "SanteDB Core APIs"  "%%Q"
 			)
 			for /R "..\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with community key
-				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB"  "%%Q"
+				"%signtool%" sign %signops% /sha1 %commkey% /d "SanteDB"  "%%Q"
 			)
 		) else (
 			for /R ".\bin" %%Q IN (%%P*.dll) DO (
 				echo Signing %%Q with community key
-				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB APIs"  "%%Q"
+				"%signtool%" sign %signops% /sha1 %commkey% /d "SanteDB APIs"  "%%Q"
 			)
 			for /R ".\bin" %%Q IN (*.exe) DO (
 				echo Signing %%Q with community key
-				%signtool% sign %signops% /sha1 %commkey% /d "SanteDB"  "%%Q"
+				"%signtool%" sign %signops% /sha1 %commkey% /d "SanteDB"  "%%Q"
 			) 
 		)
 	)
