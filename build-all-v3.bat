@@ -228,8 +228,7 @@ if [%msbuild%] == [] (
 	if exist "C:\Program Files\Microsoft Visual Studio\18\Professional\MSBuild\Current\Bin\MSBuild.exe" (
 	        	echo will use VS 2022 Pro build tools
         		set msbuild="C:\Program Files\Microsoft Visual Studio\18\Professional\MSBuild\Current\Bin"
-	)
-	else (
+	) else (
 		if exist "C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin\MsBuild.exe" (
 					echo will use VS 2022 Pro build tools
 					set msbuild="C:\Program Files\Microsoft Visual Studio\2022\Professional\MSBuild\Current\Bin"
